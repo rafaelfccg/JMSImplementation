@@ -1,6 +1,31 @@
+*.cgass
+
+#r
+*.war
+*.ear
 *.class
 
-# Mobile Tools for Java (J2ME)
+# eclipse specific git ignore
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
 # Package Files #
