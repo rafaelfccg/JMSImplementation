@@ -7,6 +7,7 @@ import java.util.Collections;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Session;
 
 public class MyMessage implements Message {
 	
@@ -24,6 +25,8 @@ public class MyMessage implements Message {
 	private Integer priority;
 	private Boolean redelivered;
 	
+	MessageAckSession sessionAck;
+	
 	static private final String BOOLEAN_PROPERTY = "BOOLEAN";
 	static private final String OBJECT_PROPERTY = "OBJECT";
 	static private final String STRING_PROPERTY = "STRING";
@@ -36,7 +39,10 @@ public class MyMessage implements Message {
 	
 	@Override
 	public void acknowledge() throws JMSException {
-		// TODO Auto-generated method stub	
+		if(sessionAck!=null){
+			sessionAck.ack(this);
+		}
+		throw new JMSException("Cannot acknowledge message, unknown session");
 	}
 
 	@Override
