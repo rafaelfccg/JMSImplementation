@@ -23,6 +23,9 @@ import javax.jms.TopicSubscriber;
 
 public class TopicSession implements Session, Runnable{
 
+	private boolean transacted;
+	private int acknowledgeMode;
+	
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
@@ -164,8 +167,7 @@ public class TopicSession implements Session, Runnable{
 
 	@Override
 	public int getAcknowledgeMode() throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
+		return acknowledgeMode;
 	}
 
 	@Override
@@ -176,8 +178,7 @@ public class TopicSession implements Session, Runnable{
 
 	@Override
 	public boolean getTransacted() throws JMSException {
-		// TODO Auto-generated method stub
-		return false;
+		return transacted;
 	}
 
 	@Override

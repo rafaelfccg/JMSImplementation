@@ -10,7 +10,6 @@ public class TopicSubscriber implements MessageConsumer{
 	@Override
 	public void close() throws JMSException {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
