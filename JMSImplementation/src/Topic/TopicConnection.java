@@ -12,7 +12,7 @@ import javax.jms.Topic;
 
 public class TopicConnection implements Connection{
 
-	private String clientID;
+	private String clientId;
 	
 	@Override
 	public void close() throws JMSException {
@@ -43,7 +43,7 @@ public class TopicConnection implements Connection{
 
 	@Override
 	public String getClientID() throws JMSException {
-		return clientID;
+		return clientId;
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class TopicConnection implements Connection{
 
 	@Override
 	public void setClientID(String arg0) throws JMSException {
-		clientID = arg0;	
+		clientId = arg0;	
 	}
 
 	@Override
