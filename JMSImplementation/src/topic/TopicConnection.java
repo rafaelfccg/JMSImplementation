@@ -1,4 +1,4 @@
-package Connection;
+package topic;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
@@ -10,11 +10,9 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-public class MyConnection implements Connection {
+public class TopicConnection implements Connection{
 
 	private String clientId;
-	private ExceptionListener exceptionListener;
-	private ConnectionMetaData connectionMetaData;
 	
 	@Override
 	public void close() throws JMSException {
@@ -26,6 +24,7 @@ public class MyConnection implements Connection {
 	public ConnectionConsumer createConnectionConsumer(Destination arg0, String arg1, ServerSessionPool arg2, int arg3)
 			throws JMSException {
 		// TODO Auto-generated method stub
+		//ConnectionConsumer connectionConsumer = new ConnectionConsumer(arg0, arg1, arg2, arg3);
 		return null;
 	}
 
@@ -49,12 +48,14 @@ public class MyConnection implements Connection {
 
 	@Override
 	public ExceptionListener getExceptionListener() throws JMSException {
-		return exceptionListener;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public ConnectionMetaData getMetaData() throws JMSException {
-		return connectionMetaData;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -64,7 +65,7 @@ public class MyConnection implements Connection {
 
 	@Override
 	public void setExceptionListener(ExceptionListener arg0) throws JMSException {
-		exceptionListener = arg0;
+		// TODO Auto-generated method stub
 		
 	}
 

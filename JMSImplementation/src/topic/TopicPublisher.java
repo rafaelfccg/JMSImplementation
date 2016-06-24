@@ -1,4 +1,4 @@
-package Topic;
+package topic;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;

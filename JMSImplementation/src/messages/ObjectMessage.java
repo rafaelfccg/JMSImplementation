@@ -1,20 +1,20 @@
-package Messages;
+package messages;
 
 import java.util.Enumeration;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.MapMessage;
+import javax.jms.Message;
 
-public class MyMapMessage extends MyMessage implements MapMessage{
-
+public class ObjectMessage extends MyMessage implements Message{
+	
+	private int jmsDeliveryMode;
 	private long jmsExpiration;
 	private String jmsMessageId;
 	private int jmsPriority;
 	private boolean jmsRedelivered;
 	private long jmsTimestamp;
 	private String jmsType;
-	private int jmsDeliveryMode;
 	
 	@Override
 	public void acknowledge() throws JMSException {
@@ -203,7 +203,7 @@ public class MyMapMessage extends MyMessage implements MapMessage{
 
 	@Override
 	public void setJMSDeliveryMode(int arg0) throws JMSException {
-		// TODO Auto-generated method stub
+		jmsDeliveryMode = arg0;
 		
 	}
 
@@ -215,25 +215,25 @@ public class MyMapMessage extends MyMessage implements MapMessage{
 
 	@Override
 	public void setJMSExpiration(long arg0) throws JMSException {
-		// TODO Auto-generated method stub
+		jmsExpiration = arg0;
 		
 	}
 
 	@Override
 	public void setJMSMessageID(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
+		jmsMessageId = arg0;
 		
 	}
 
 	@Override
 	public void setJMSPriority(int arg0) throws JMSException {
-		// TODO Auto-generated method stub
+		jmsPriority = arg0;
 		
 	}
 
 	@Override
 	public void setJMSRedelivered(boolean arg0) throws JMSException {
-		// TODO Auto-generated method stub
+		jmsRedelivered = arg0;
 		
 	}
 
@@ -245,13 +245,13 @@ public class MyMapMessage extends MyMessage implements MapMessage{
 
 	@Override
 	public void setJMSTimestamp(long arg0) throws JMSException {
-		// TODO Auto-generated method stub
+		jmsTimestamp = arg0;
 		
 	}
 
 	@Override
 	public void setJMSType(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
+		jmsType = arg0;
 		
 	}
 
@@ -275,156 +275,6 @@ public class MyMapMessage extends MyMessage implements MapMessage{
 
 	@Override
 	public void setStringProperty(String arg0, String arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean getBoolean(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public byte getByte(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public byte[] getBytes(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public char getChar(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double getDouble(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public float getFloat(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getInt(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long getLong(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Enumeration getMapNames() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object getObject(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public short getShort(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public String getString(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean itemExists(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setBoolean(String arg0, boolean arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setByte(String arg0, byte arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setBytes(String arg0, byte[] arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setBytes(String arg0, byte[] arg1, int arg2, int arg3) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setChar(String arg0, char arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setDouble(String arg0, double arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setFloat(String arg0, float arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setInt(String arg0, int arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setLong(String arg0, long arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setObject(String arg0, Object arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setShort(String arg0, short arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setString(String arg0, String arg1) throws JMSException {
 		// TODO Auto-generated method stub
 		
 	}

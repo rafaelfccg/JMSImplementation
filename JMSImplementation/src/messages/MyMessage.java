@@ -1,4 +1,4 @@
-package Messages;
+package messages;
 
 import java.util.Enumeration;
 import java.util.HashMap;

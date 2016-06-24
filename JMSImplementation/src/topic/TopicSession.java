@@ -1,4 +1,4 @@
-package Topic;
+package topic;
 
 import java.io.Serializable;
 

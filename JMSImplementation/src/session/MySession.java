@@ -1,4 +1,4 @@
-package Session;
+package session;
 
 public class MySession {
 

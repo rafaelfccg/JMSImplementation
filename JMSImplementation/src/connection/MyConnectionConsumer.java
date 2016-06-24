@@ -1,4 +1,4 @@
-package Connection;
+package connection;
 
 import javax.jms.ConnectionConsumer;
 import javax.jms.JMSException;

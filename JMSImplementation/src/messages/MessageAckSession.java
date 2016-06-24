@@ -1,4 +1,4 @@
-package Messages;
+package messages;
 
 import javax.jms.JMSException;
 import javax.jms.Message;

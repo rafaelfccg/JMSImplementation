@@ -1,10 +1,10 @@
-package Topic;
+package connection;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
-public class TopicConnectionFactory implements ConnectionFactory {
+public class MyConnectionFactory implements ConnectionFactory{
 
 	@Override
 	public Connection createConnection() throws JMSException {
@@ -17,4 +17,5 @@ public class TopicConnectionFactory implements ConnectionFactory {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }
