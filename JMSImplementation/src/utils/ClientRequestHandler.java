@@ -18,6 +18,9 @@ public class ClientRequestHandler {
 	public ClientRequestHandler(String hostname, int port) throws UnknownHostException, IOException{
 		this.hostname = hostname;
 		this.port = port;
+		this.socket = new Socket(this.hostname, this.port);
+		this.output = new DataOutputStream(this.socket.getOutputStream());
+		this.input = new DataInputStream(this.socket.getInputStream());
 	}
 	
 	public byte[] sendAndReceive(byte[] bytes) throws IOException{
@@ -26,9 +29,6 @@ public class ClientRequestHandler {
 	}
 	 
 	public void send(byte[] bytes) throws IOException{
-		this.socket = new Socket(this.hostname, this.port);
-		this.output = new DataOutputStream(this.socket.getOutputStream());
-		this.input = new DataInputStream(this.socket.getInputStream());
 		this.output.writeInt(bytes.length);
 		this.output.write(bytes);
 	}
@@ -37,7 +37,6 @@ public class ClientRequestHandler {
 		int size = this.input.readInt();
 		byte[] bytes = new byte[size];
 		this.input.readFully(bytes);
-		this.socket.close();
 		return bytes;
 	}
 	
