@@ -21,8 +21,12 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
+import connection.MyConnectionSendMessage;
+
 public class MySession implements Session{
 
+	MyConnectionSendMessage connection;
+	
 	@Override
 	public void close() throws JMSException {
 		// TODO Auto-generated method stub
