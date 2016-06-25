@@ -20,9 +20,8 @@ local.properties
 .classpath
 .settings/
 .loadpath
-
-# External tool builders
 .externalToolBuilders/
+.recommenders/
 
 # Locally stored "Eclipse launch configurations"
 *.launch Mobile Tools for Java (J2ME)
