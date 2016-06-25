@@ -40,4 +40,8 @@ public class ClientRequestHandler {
 		return bytes;
 	}
 	
+	public void closeConnection() throws IOException{
+		this.socket.close();
+	}
+	
 }
