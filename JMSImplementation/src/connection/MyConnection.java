@@ -1,23 +1,28 @@
 package connection;
 
+import java.io.IOException;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
 import javax.jms.ConnectionMetaData;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-import server.ConnectionHandler;
+import utils.ClientRequestHandler;
+import utils.Marshaller;
 
-public class MyConnection implements Connection {
+
+public class MyConnection implements Connection, MyConnectionSendMessage {
 
 	private String clientId;
 	private ExceptionListener exceptionListener;
 	private ConnectionMetaData connectionMetaData;
-	private ConnectionHandler connection;
+	private ClientRequestHandler connection;
 	private boolean open = true;
 	private boolean modified = false;
 	
@@ -105,17 +110,12 @@ public class MyConnection implements Connection {
 		
 	}
 
-	public ConnectionHandler getConnection() {
-		setModified();
-		return connection;
-	}
-
-	public void setConnection(ConnectionHandler connection) {
-		setModified();
-		this.connection = connection;
-	}
-
 	public void setModified() {
 		this.modified = true;
+	}
+
+	@Override
+	public void send(Message myMessage) throws IOException {
+		connection.send(Marshaller.marshall(myMessage));
 	}
 }
