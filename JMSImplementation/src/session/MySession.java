@@ -23,9 +23,17 @@ import javax.jms.TopicSubscriber;
 
 import connection.MyConnectionSendMessage;
 
-public class MySession implements Session{
+public class MySession implements Session, SessionMessageReceiverListener{
 
 	MyConnectionSendMessage connection;
+	boolean transacted;
+	int acknowledgeMode;
+	
+	public MySession(boolean trans, int ack, MyConnectionSendMessage connection){
+		this.transacted = trans;
+		this.acknowledgeMode = ack;
+		this.connection = connection;
+	}
 	
 	@Override
 	public void close() throws JMSException {
@@ -204,6 +212,12 @@ public class MySession implements Session{
 
 	@Override
 	public void unsubscribe(String arg0) throws JMSException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMessageReceived() {
 		// TODO Auto-generated method stub
 		
 	}

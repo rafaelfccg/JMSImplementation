@@ -1,6 +1,8 @@
 package connection;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
@@ -13,6 +15,9 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import messages.MyMessage;
+import session.MySession;
+import session.SessionMessageReceiverListener;
 import utils.ClientRequestHandler;
 import utils.Marshaller;
 
@@ -20,53 +25,79 @@ import utils.Marshaller;
 public class MyConnection implements Connection, MyConnectionSendMessage {
 
 	private String clientId;
+	private String hostIp;
+	private int hostPort;
 	private ExceptionListener exceptionListener;
 	private ConnectionMetaData connectionMetaData;
-	private ClientRequestHandler connection;
-	private boolean open = true;
+	private ClientRequestHandler subscriberConnection;
+	private ClientRequestHandler publisherConnection;
+	private boolean open = false;
+	private boolean stopped = false;
 	private boolean modified = false;
+	private HashMap<Destination,ArrayList<SessionMessageReceiverListener>> subscribed;
+	private ArrayList<Session> sessions;
+	
 	
 	private void isOpen() throws JMSException{
 		if(!this.open){
 			throw new JMSException("Operation perfomed on closed session");
 		}
 	}
-	
+	public void onMessageReceived(Message message){
+		Destination destination;
+		if(!this.stopped){
+			try {
+				destination = message.getJMSDestination();
+				ArrayList<SessionMessageReceiverListener> sessions = this.subscribed.get(destination);
+				for(SessionMessageReceiverListener session : sessions ){
+					session.onMessageReceived();
+				}
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	private void callExceptionListener(Exception e){
+		JMSException error = new JMSException(e.getMessage());
+		error.setLinkedException(e);
+		if(this.exceptionListener != null){ 
+			this.exceptionListener.onException(error);
+		}
+	}
 	@Override
 	public void close() throws JMSException {
-		// TODO Auto-generated method stub
 		setModified();
-		isOpen();
-		
 		this.open = false;
-		
+		try {
+			this.subscriberConnection.closeConnection();
+			this.publisherConnection.closeConnection();
+		} catch (IOException e) {
+			callExceptionListener(e);
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public ConnectionConsumer createConnectionConsumer(Destination arg0, String arg1, ServerSessionPool arg2, int arg3)
 			throws JMSException {
 		// TODO Auto-generated method stub
-		setModified();
-		isOpen();
-		return null;
+		throw new JMSException("Method not Implemented");
 	}
 
 	@Override
 	public ConnectionConsumer createDurableConnectionConsumer(Topic arg0, String arg1, String arg2,
 			ServerSessionPool arg3, int arg4) throws JMSException {
 		// TODO Auto-generated method stub
-		setModified();
-		isOpen();
-		
-		return null;
+		throw new JMSException("Method not Implemented");
 	}
 
 	@Override
-	public Session createSession(boolean arg0, int arg1) throws JMSException {
-		// TODO Auto-generated method stub
+	public Session createSession(boolean transacted, int acknowledgeMode) throws JMSException {
 		setModified();
-		isOpen();
-		return null;
+		Session session = new MySession(transacted,acknowledgeMode,this);
+		this.sessions.add(session);
+		return session;
 	}
 
 	@Override
@@ -97,16 +128,50 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		exceptionListener = arg0;
 		
 	}
+	private void publisherHandShake(){
+		
+	}
+	
+	private void subscriberHandShake(){
+		
+	}
 
 	@Override
 	public void start() throws JMSException {
-		// TODO Auto-generated method stub
-		
+		try {
+			if(!this.open){
+				int numberOfTries = 0;
+				while(numberOfTries<3){
+					numberOfTries++;
+					try {
+						subscriberConnection = new ClientRequestHandler(hostIp, hostPort);
+						subscriberHandShake();
+						publisherConnection = new ClientRequestHandler(hostIp, hostPort);
+						publisherHandShake();
+						this.open = true;
+						this.stopped = false;
+						break;
+					} catch (Exception e) {
+						if(subscriberConnection != null) subscriberConnection.closeConnection();
+						if(publisherConnection != null) subscriberConnection.closeConnection();
+					}
+					int delay = (int) (1000*Math.pow(2, numberOfTries));
+					System.out.println("Connection failure, trying again in "+ delay + "...");
+					Thread.sleep(delay);
+				}
+				
+				if(numberOfTries >=3) throw new JMSException("Could not connect to server");
+			}
+		} catch (Exception e) {
+			callExceptionListener(e);
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void stop() throws JMSException {
 		// TODO Auto-generated method stub
+		this.stopped = true;
 		
 	}
 
@@ -115,7 +180,29 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	}
 
 	@Override
-	public void send(Message myMessage) throws IOException {
-		connection.send(Marshaller.marshall(myMessage));
+	public void sendMessage(Message myMessage) throws IOException, JMSException {
+		isOpen();
+		setModified();
+		publisherConnection.send(Marshaller.marshall(myMessage));
+	}
+	private void subscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session){
+		ArrayList<SessionMessageReceiverListener> arr = this.subscribed.get(destination);
+		if(arr == null){
+			arr = new ArrayList<SessionMessageReceiverListener>();
+			this.subscribed.put(destination, arr);
+		}else{
+			if(!arr.contains(session)){
+				arr.add(session);
+			}
+		}
+	}
+	@Override
+	public void subscribe(Destination destination, SessionMessageReceiverListener session) throws IOException, JMSException {
+		isOpen();
+		setModified();
+		Message msg = new MyMessage();
+		msg.setJMSDestination(destination);
+		subscribeSessionToDestination(destination, session);
+		publisherConnection.send(Marshaller.marshall(msg));
 	}
 }
