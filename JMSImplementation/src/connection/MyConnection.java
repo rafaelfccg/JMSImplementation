@@ -15,7 +15,8 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-import messages.MyMessage;
+import server.query.AbstractQuery;
+import server.query.SubscriberQuery;
 import session.MySession;
 import session.SessionMessageReceiverListener;
 import utils.ClientRequestHandler;
@@ -170,9 +171,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 
 	@Override
 	public void stop() throws JMSException {
-		// TODO Auto-generated method stub
 		this.stopped = true;
-		
 	}
 
 	public void setModified() {
@@ -200,9 +199,21 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	public void subscribe(Destination destination, SessionMessageReceiverListener session) throws IOException, JMSException {
 		isOpen();
 		setModified();
-		Message msg = new MyMessage();
-		msg.setJMSDestination(destination);
+		Topic topic = (Topic) destination;
 		subscribeSessionToDestination(destination, session);
-		publisherConnection.send(Marshaller.marshall(msg));
+		AbstractQuery query = new SubscriberQuery(getClientID(),topic.getTopicName());
+		publisherConnection.send(query);
+	}
+	@Override
+	public void unsubscribe(Destination destination, SessionMessageReceiverListener session)
+			throws IOException, JMSException {
+		isOpen();
+		setModified();
+		Topic topic = (Topic) destination;
+		subscribeSessionToDestination(destination, session);
+		//UnsubscriberQuery
+		//AbstractQuery query = new SubscriberQuery(getClientID(),topic.getTopicName());
+		//publisherConnection.send(query);
+		
 	}
 }
