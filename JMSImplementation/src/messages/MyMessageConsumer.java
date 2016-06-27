@@ -48,7 +48,6 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 	@Override
 	public void setMessageListener(MessageListener arg0) throws JMSException {
 		messageListener = arg0;
-		
 	}
 
 	@Override

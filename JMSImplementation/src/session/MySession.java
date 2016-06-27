@@ -24,6 +24,7 @@ import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
 import connection.MyConnectionSendMessage;
+import messages.MyMessageConsumer;
 
 public class MySession implements Session, SessionMessageReceiverListener{
 
@@ -69,9 +70,15 @@ public class MySession implements Session, SessionMessageReceiverListener{
 	}
 
 	@Override
-	public MessageConsumer createConsumer(Destination arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+	public MessageConsumer createConsumer(Destination destination) throws JMSException {
+		MyMessageConsumer msgConsumer = new MyMessageConsumer();
+		ArrayList<MessageListener> list = this.subscribedList.get(destination);
+		if( list == null){
+			list = new ArrayList<MessageListener>();
+			this.subscribedList.put(destination, list);
+		}
+		list.add(msgConsumer);
+		return msgConsumer;
 	}
 
 	@Override
