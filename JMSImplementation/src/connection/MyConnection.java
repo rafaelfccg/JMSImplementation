@@ -50,7 +50,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 				destination = message.getJMSDestination();
 				ArrayList<SessionMessageReceiverListener> sessions = this.subscribed.get(destination);
 				for(SessionMessageReceiverListener session : sessions ){
-					session.onMessageReceived();
+					session.onMessageReceived(message);
 				}
 			} catch (JMSException e) {
 				e.printStackTrace();

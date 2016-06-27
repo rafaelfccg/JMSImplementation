@@ -5,7 +5,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 
-public class MyMessageConsumer implements MessageConsumer {
+public class MyMessageConsumer implements MessageConsumer, MessageListener {
 
 	MessageListener messageListener;
 	//MessageSelector messageSelector;
@@ -49,5 +49,18 @@ public class MyMessageConsumer implements MessageConsumer {
 	public void setMessageListener(MessageListener arg0) throws JMSException {
 		messageListener = arg0;
 		
+	}
+
+	@Override
+	public void onMessage(Message message) {
+        try {
+            if (messageListener != null) {
+            	messageListener.onMessage(message);
+            } else {
+                System.err.println("MessageListener no longer registered");
+            }
+        } catch (Throwable exception) {
+        	exception.printStackTrace();
+        }
 	}
 }

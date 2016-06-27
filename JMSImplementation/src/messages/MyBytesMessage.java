@@ -1,20 +1,16 @@
 package messages;
 
 import javax.jms.BytesMessage;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.*;
 import java.io.IOException;
 import java.io.Serializable;
 
 public class MyBytesMessage extends MyMessage implements BytesMessage{
 
-	private Destination destination;
-	private String jmsMessageId;
 	private byte[] messageBody;
 
 	private DataOutputStream out = null;

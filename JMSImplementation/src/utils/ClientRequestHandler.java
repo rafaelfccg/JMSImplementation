@@ -1,10 +1,14 @@
 package utils;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import javax.jms.Message;
+
+import connection.MyConnection;
 
 public class ClientRequestHandler {
 
@@ -12,36 +16,75 @@ public class ClientRequestHandler {
 	private int port;
 	
 	private Socket socket;
-	private DataOutputStream output;
-	private DataInputStream input;
+	private ObjectOutputStream output;
+	private ObjectInputStream input;
+	
+	private MyConnection connection;
+	
 	
 	public ClientRequestHandler(String hostname, int port) throws UnknownHostException, IOException{
 		this.hostname = hostname;
 		this.port = port;
 		this.socket = new Socket(this.hostname, this.port);
-		this.output = new DataOutputStream(this.socket.getOutputStream());
-		this.input = new DataInputStream(this.socket.getInputStream());
+		this.output = new ObjectOutputStream(this.socket.getOutputStream());
+		this.input = new ObjectInputStream(this.socket.getInputStream());
 	}
 	
-	public byte[] sendAndReceive(byte[] bytes) throws IOException{
-		send(bytes);
+	public Object sendAndReceive(Object object) throws IOException, ClassNotFoundException{
+		send(object);
 		return receive();
 	}
 	 
-	public void send(byte[] bytes) throws IOException{
-		this.output.writeInt(bytes.length);
-		this.output.write(bytes);
+	public void send(Object object) throws IOException{
+		this.output.writeObject(object);
 	}
-	
-	public byte[] receive() throws IOException{
-		int size = this.input.readInt();
-		byte[] bytes = new byte[size];
-		this.input.readFully(bytes);
-		return bytes;
+	public void sendMessageAsync(Message message){
+		MyMessageSender sender = new MyMessageSender();
+		sender.message = message;
+		Thread senderThread = new Thread(sender);
+		senderThread.start();
+	}
+	public Object receive() throws IOException, ClassNotFoundException{
+		Object object  = this.input.readObject();
+		return object;
 	}
 	
 	public void closeConnection() throws IOException{
 		this.socket.close();
 	}
+	public void startMessageReceving(){
+		Thread receiver = new Thread(new MyMessageReceiver());
+		receiver.start();
+	}
 	
+	private class MyMessageReceiver implements Runnable{
+		@Override
+		public void run() {
+			while(!socket.isClosed()){
+				try {
+					Message message = (Message)receive();
+					connection.onMessageReceived(message);
+				} catch (ClassNotFoundException e) {
+					System.err.println("Wrong message Type Received");
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	private class MyMessageSender implements Runnable{
+		Message message;
+		@Override
+		public void run() {
+			if(!socket.isClosed()){
+				try {
+					send(message);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 }

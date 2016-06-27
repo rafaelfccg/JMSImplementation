@@ -1,6 +1,8 @@
 package session;
 
+import javax.jms.Message;
+
 public interface SessionMessageReceiverListener {
-	public void onMessageReceived();
+	public void onMessageReceived(Message message);
 
 }

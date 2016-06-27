@@ -1,6 +1,8 @@
 package session;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -28,6 +30,7 @@ public class MySession implements Session, SessionMessageReceiverListener{
 	MyConnectionSendMessage connection;
 	boolean transacted;
 	int acknowledgeMode;
+	HashMap<Destination, ArrayList<MessageListener>> subscribedList;
 	
 	public MySession(boolean trans, int ack, MyConnectionSendMessage connection){
 		this.transacted = trans;
@@ -217,9 +220,17 @@ public class MySession implements Session, SessionMessageReceiverListener{
 	}
 
 	@Override
-	public void onMessageReceived() {
-		// TODO Auto-generated method stub
-		
+	public void onMessageReceived(Message message) {
+		Destination destination;
+		try {
+			destination = message.getJMSDestination();
+			ArrayList<MessageListener> consumers = this.subscribedList.get(destination);
+			for(MessageListener consumer : consumers ){
+				consumer.onMessage(message);
+			}
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
