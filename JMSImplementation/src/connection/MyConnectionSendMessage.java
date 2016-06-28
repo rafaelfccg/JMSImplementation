@@ -11,5 +11,6 @@ import session.SessionMessageReceiverListener;
 public interface MyConnectionSendMessage {
 	public void sendMessage(Message my) throws IOException, JMSException;
 	public void subscribe(Destination destination, SessionMessageReceiverListener session) throws IOException, JMSException;
-	public void unsubscribe(Destination destination, SessionMessageReceiverListener session) throws IOException, JMSException;
+	public void unsubscribe(String destination, SessionMessageReceiverListener session) throws IOException, JMSException;
+	public void acknowledgeMessage(Message message) throws IOException, JMSException;
 }

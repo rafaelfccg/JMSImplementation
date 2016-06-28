@@ -1,5 +1,6 @@
 package session;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,9 +25,10 @@ import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
 import connection.MyConnectionSendMessage;
+import messages.MessageAckSession;
 import messages.MyMessageConsumer;
 
-public class MySession implements Session, SessionMessageReceiverListener{
+public class MySession implements Session, SessionMessageReceiverListener, MessageAckSession{
 
 	MyConnectionSendMessage connection;
 	boolean transacted;
@@ -222,7 +224,12 @@ public class MySession implements Session, SessionMessageReceiverListener{
 
 	@Override
 	public void unsubscribe(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
+		try {
+			this.connection.unsubscribe(arg0, this);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
@@ -238,6 +245,11 @@ public class MySession implements Session, SessionMessageReceiverListener{
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void ack(Message message) throws JMSException {
+		// TODO Auto-generated method stub
 	}
 
 }

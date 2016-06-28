@@ -19,6 +19,7 @@ import server.query.AbstractQuery;
 import server.query.SubscriberQuery;
 import session.MySession;
 import session.SessionMessageReceiverListener;
+import topic.MyTopic;
 import utils.ClientRequestHandler;
 import utils.Marshaller;
 
@@ -184,6 +185,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		setModified();
 		publisherConnection.send(Marshaller.marshall(myMessage));
 	}
+	
 	private void subscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session){
 		ArrayList<SessionMessageReceiverListener> arr = this.subscribed.get(destination);
 		if(arr == null){
@@ -193,6 +195,17 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 			if(!arr.contains(session)){
 				arr.add(session);
 			}
+		}
+	}
+	
+	private boolean unsubscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session) throws JMSException{
+		ArrayList<SessionMessageReceiverListener> arr = this.subscribed.get(destination);
+		if(arr == null){
+			throw new JMSException("Try to unsubscribe from a topic you have not subscribed before");
+		}else{
+			arr.remove(session);
+			if(arr.isEmpty()) return true;
+			else return false;
 		}
 	}
 	@Override
@@ -205,15 +218,25 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		publisherConnection.send(query);
 	}
 	@Override
-	public void unsubscribe(Destination destination, SessionMessageReceiverListener session)
+	public void unsubscribe(String destination, SessionMessageReceiverListener session)
 			throws IOException, JMSException {
 		isOpen();
 		setModified();
-		Topic topic = (Topic) destination;
-		subscribeSessionToDestination(destination, session);
+		Topic topic = new MyTopic(destination);
+		boolean unsubcribe = unsubscribeSessionToDestination(topic, session);
 		//UnsubscriberQuery
+		if(unsubcribe){
 		//AbstractQuery query = new SubscriberQuery(getClientID(),topic.getTopicName());
 		//publisherConnection.send(query);
+		}
 		
+	}
+	@Override
+	public void acknowledgeMessage(Message message) throws IOException, JMSException {
+		isOpen();
+		setModified();
+		//AckQuery
+		//AbstractQuery query = new SubscriberQuery(getClientID(),topic.getTopicName());
+		//publisherConnection.send(query);
 	}
 }
