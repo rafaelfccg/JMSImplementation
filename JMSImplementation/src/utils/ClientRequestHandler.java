@@ -9,6 +9,8 @@ import java.net.UnknownHostException;
 import javax.jms.Message;
 
 import connection.MyConnection;
+import server.query.Query;
+import server.query.QueryType;
 
 public class ClientRequestHandler {
 
@@ -22,12 +24,34 @@ public class ClientRequestHandler {
 	private MyConnection connection;
 	
 	
-	public ClientRequestHandler(String hostname, int port) throws UnknownHostException, IOException{
+	public ClientRequestHandler(String hostname, int port,boolean isSubscriber, String clientId) throws UnknownHostException, ClassNotFoundException , IOException{
 		this.hostname = hostname;
 		this.port = port;
 		this.socket = new Socket(this.hostname, this.port);
+		sendType(isSubscriber,clientId);
+		waitAck(isSubscriber);
 		this.output = new ObjectOutputStream(this.socket.getOutputStream());
 		this.input = new ObjectInputStream(this.socket.getInputStream());
+	}
+	
+	private void sendType(boolean isSubscriber, String clientId) throws IOException {
+		Query type;
+		if(isSubscriber){
+			type= new Query(clientId, QueryType.REGISTER_CONSUMER);
+		}else{
+			type= new Query(clientId, QueryType.REGISTER_PRODUCER);
+		}
+		send(type);
+		
+	}
+
+	private void waitAck(boolean isSubscriber) throws ClassNotFoundException, IOException{
+		Query ack = (Query) this.input.readObject();
+		if(isSubscriber && ack.getType() == QueryType.REGISTER_CONSUMER_ACK  ||
+				!isSubscriber && ack.getType() == QueryType.REGISTER_CONSUMER_ACK){
+			return;
+		}
+		throw new IOException("Ack was not received");
 	}
 	
 	public Object sendAndReceive(Object object) throws IOException, ClassNotFoundException{

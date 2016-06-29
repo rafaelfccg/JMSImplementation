@@ -249,7 +249,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 
 	@Override
 	public void ack(Message message) throws JMSException {
-		// TODO Auto-generated method stub
+		
 	}
 
 }

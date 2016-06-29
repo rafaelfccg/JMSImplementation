@@ -31,8 +31,8 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	private int hostPort;
 	private ExceptionListener exceptionListener;
 	private ConnectionMetaData connectionMetaData;
-	private ClientRequestHandler subscriberConnection;
-	private ClientRequestHandler publisherConnection;
+	private ClientRequestHandler receiverConnection;
+	private ClientRequestHandler senderConnection;
 	private boolean open = false;
 	private boolean stopped = false;
 	private boolean modified = false;
@@ -72,8 +72,8 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		setModified();
 		this.open = false;
 		try {
-			this.subscriberConnection.closeConnection();
-			this.publisherConnection.closeConnection();
+			this.receiverConnection.closeConnection();
+			this.senderConnection.closeConnection();
 		} catch (IOException e) {
 			callExceptionListener(e);
 			e.printStackTrace();
@@ -146,16 +146,16 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 				while(numberOfTries<3){
 					numberOfTries++;
 					try {
-						subscriberConnection = new ClientRequestHandler(hostIp, hostPort);
+						receiverConnection = new ClientRequestHandler(hostIp, hostPort, true, getClientID());
 						subscriberHandShake();
-						publisherConnection = new ClientRequestHandler(hostIp, hostPort);
+						senderConnection = new ClientRequestHandler(hostIp, hostPort, false, getClientID());
 						publisherHandShake();
 						this.open = true;
 						this.stopped = false;
 						break;
 					} catch (Exception e) {
-						if(subscriberConnection != null) subscriberConnection.closeConnection();
-						if(publisherConnection != null) subscriberConnection.closeConnection();
+						if(receiverConnection != null) receiverConnection.closeConnection();
+						if(senderConnection != null) senderConnection.closeConnection();
 					}
 					int delay = (int) (1000*Math.pow(2, numberOfTries));
 					System.out.println("Connection failure, trying again in "+ delay + "...");
@@ -183,7 +183,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	public void sendMessage(Message myMessage) throws IOException, JMSException {
 		isOpen();
 		setModified();
-		publisherConnection.send(Marshaller.marshall(myMessage));
+		senderConnection.send(myMessage);
 	}
 	
 	private void subscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session){
@@ -215,7 +215,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		Topic topic = (Topic) destination;
 		subscribeSessionToDestination(destination, session);
 		Query query = new SubscriberQuery(getClientID(),topic.getTopicName());
-		publisherConnection.send(query);
+		senderConnection.send(query);
 	}
 	@Override
 	public void unsubscribe(String destination, SessionMessageReceiverListener session)
