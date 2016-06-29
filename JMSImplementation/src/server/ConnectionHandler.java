@@ -4,10 +4,26 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import server.query.AbstractQuery;
+import server.query.Query;
+import server.query.QueryType;
+import server.query.SubscriberQuery;
+
+enum ConnectionHandlerType{
+	UNKNOWN,
+	CONSUMER,
+	PRODUCER
+}
 
 public class ConnectionHandler implements Runnable{
+	
+	private static final Logger logger = Logger.getLogger( Server.class.getName() );
+	
+	private int id;
 	
 	private Server server;
 	
@@ -19,35 +35,39 @@ public class ConnectionHandler implements Runnable{
 	
 	private boolean running;
 	
-	public ConnectionHandler(Socket socket, Server server) throws IOException{
+	private ConnectionHandlerType type;
+	
+	private LinkedBlockingQueue<Object> toSend;
+	
+	public ConnectionHandler(int id, Socket socket, Server server) throws IOException{
+		this.id = id;
 		this.socket = socket;
 		this.server = server;
 		this.outputStream = new ObjectOutputStream(socket.getOutputStream());
 		this.inputStream = new ObjectInputStream(socket.getInputStream());
 		this.running = true;
+		this.type = ConnectionHandlerType.UNKNOWN;
+		this.toSend = new LinkedBlockingQueue<Object>();
 	}
 
 	@Override
 	public void run() {
 
+		// Register this socket as a CONSUMER or PRODUCER
+		try {
+			this.handleRegister();
+		} catch (Exception e) {
+			this.running = false;
+		}
+		
+		// Execute different actions based on the type of this socket
 		while(running){
 			try {
 				
-				AbstractQuery query = (AbstractQuery) this.inputStream.readObject();
-
-				switch(query.getType()){
-					case SUBSCRIBE:
-						this.handleSubscribe(query);
-						break;
-					case UNSUBSCRIBE:
-						this.handleUnsubscribe(query);
-						break;
-					case CREATE_TOPIC:
-						this.handleCreateTopic(query);
-						break;
-					case DELETE_TOPIC:
-						this.handleDeleteTopic(query);
-						break;
+				if(this.type == ConnectionHandlerType.CONSUMER){
+					doConsumer();
+				}else if(this.type == ConnectionHandlerType.PRODUCER){
+					doProducer();
 				}
 				
 			} catch (Exception e) {
@@ -55,24 +75,132 @@ public class ConnectionHandler implements Runnable{
 			}
 		}
 		
+		try {
+			this.outputStream.close();
+			this.inputStream.close();
+			this.socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+
+	/**
+	 * Main method for executing a consumer action.
+	 * Receives a message, handles it and then sends the ACK.
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
+	private void doConsumer() throws ClassNotFoundException, IOException{
+		Query query = (Query) this.inputStream.readObject();
+
+		switch(query.getType()){
+			case SUBSCRIBE:
+				this.handleSubscribe(query);
+				break;
+			case UNSUBSCRIBE:
+				this.handleUnsubscribe(query);
+				break;
+			case CREATE_TOPIC:
+				this.handleCreateTopic(query);
+				break;
+			case DELETE_TOPIC:
+				this.handleDeleteTopic(query);
+				break;
+		}
+		
+		// Send ACK
+		Query ack = new Query(query.getClientId(), QueryType.ACK);
+		this.server.getProducers().get(query.getClientId()).getToSend().add(ack);
+	}
+	
+	/**
+	 * Main method for executing a producer action.
+	 * Waits until a message is available in the queue and then sends the message.
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
+	private void doProducer() throws InterruptedException, IOException{
+		
+		Object obj = this.toSend.take();
+		
+		this.outputStream.writeObject(obj);
+		
 	}
 
-	private void handleDeleteTopic(AbstractQuery query) {
+	/**
+	 * Handle the socket registration
+	 * @throws Exception
+	 */
+	private void handleRegister() throws Exception {
+
+		Query query = (Query) this.inputStream.readObject();
+		
+		switch(query.getType()){
+			case REGISTER_CONSUMER:
+				this.handleRegisterConsumer(query);
+				break;
+			case REGISTER_PRODUCER:
+				this.handleRegisterProducer(query);
+				break;
+			default:
+				throw new Exception("Expecting REGISTER_CONSUMER or REGISTER_PRODUCER query.");
+		}
+		
+	}
+
+	/**
+	 * Register this socket as a PRODUCER
+	 * @param query
+	 * @throws IOException
+	 */
+	private void handleRegisterProducer(Query query) throws IOException {
+		logger.log(Level.INFO, "Producer registered ({0})", this.id);
+		this.type = ConnectionHandlerType.PRODUCER;
+		
+		// Send ACK
+		Query ack = new Query(query.getClientId(), QueryType.REGISTER_PRODUCER_ACK);
+		this.outputStream.writeObject(ack);
+		
+		// Register this socket in the server
+		this.server.handleRegisterConsumer(query, this.id);
+	}
+
+	/**
+	 * Register this socket as a CONSUMER
+	 * @param query
+	 * @throws IOException
+	 */
+	private void handleRegisterConsumer(Query query) throws IOException {
+		logger.log(Level.INFO, "Consumer registered ({0})", this.id);
+		this.type = ConnectionHandlerType.CONSUMER;
+		
+		// Send ACK
+		Query ack = new Query(query.getClientId(), QueryType.REGISTER_CONSUMER_ACK);
+		this.outputStream.writeObject(ack);
+		
+		// Register this socket in the server
+		this.server.handleRegisterConsumer(query, this.id);
+	}
+
+	private void handleDeleteTopic(Query query) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private void handleCreateTopic(AbstractQuery query) {
+	private void handleCreateTopic(Query query) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private void handleUnsubscribe(AbstractQuery query) {
+	private void handleUnsubscribe(Query query) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private void handleSubscribe(AbstractQuery query) {
+	private void handleSubscribe(Query query) {
 		// TODO Auto-generated method stub	
 	}
 	
@@ -114,6 +242,30 @@ public class ConnectionHandler implements Runnable{
 
 	public void setRunning(boolean running) {
 		this.running = running;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public ConnectionHandlerType getType() {
+		return type;
+	}
+
+	public void setType(ConnectionHandlerType type) {
+		this.type = type;
+	}
+
+	public LinkedBlockingQueue<Object> getToSend() {
+		return toSend;
+	}
+
+	public void setToSend(LinkedBlockingQueue<Object> toSend) {
+		this.toSend = toSend;
 	}
 	
 }

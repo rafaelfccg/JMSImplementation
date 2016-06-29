@@ -1,12 +1,11 @@
 package server.query;
 
-public class TopicQuery extends AbstractQuery {
+public class TopicQuery extends Query {
 	
 	private String name;
 
-	public TopicQuery(String name) {
-		super();
-		this.setType(QueryType.CREATE_TOPIC);
+	public TopicQuery(String clientId, String name) {
+		super(clientId, QueryType.CREATE_TOPIC);
 		this.name = name;
 	}
 

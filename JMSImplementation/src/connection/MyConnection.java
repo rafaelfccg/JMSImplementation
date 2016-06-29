@@ -15,7 +15,7 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-import server.query.AbstractQuery;
+import server.query.Query;
 import server.query.SubscriberQuery;
 import session.MySession;
 import session.SessionMessageReceiverListener;
@@ -214,7 +214,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		setModified();
 		Topic topic = (Topic) destination;
 		subscribeSessionToDestination(destination, session);
-		AbstractQuery query = new SubscriberQuery(getClientID(),topic.getTopicName());
+		Query query = new SubscriberQuery(getClientID(),topic.getTopicName());
 		publisherConnection.send(query);
 	}
 	@Override
