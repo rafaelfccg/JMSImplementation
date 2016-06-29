@@ -33,6 +33,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 	MyConnectionSendMessage connection;
 	boolean transacted;
 	int acknowledgeMode;
+	MessageListener messageListener;
 	HashMap<Destination, ArrayList<MessageListener>> subscribedList;
 	
 	public MySession(boolean trans, int ack, MyConnectionSendMessage connection){
@@ -43,26 +44,23 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 	
 	@Override
 	public void close() throws JMSException {
-		// TODO Auto-generated method stub
+		connection.closeSession(this);
 		
 	}
 
 	@Override
 	public void commit() throws JMSException {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public QueueBrowser createBrowser(Queue arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
 	public QueueBrowser createBrowser(Queue arg0, String arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
@@ -140,20 +138,17 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 
 	@Override
 	public Queue createQueue(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
 	public StreamMessage createStreamMessage() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
 	public TemporaryQueue createTemporaryQueue() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
@@ -188,8 +183,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 
 	@Override
 	public MessageListener getMessageListener() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		return this.messageListener;
 	}
 
 	@Override
@@ -218,8 +212,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 
 	@Override
 	public void setMessageListener(MessageListener arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		
+		this.messageListener = arg0;
 	}
 
 	@Override
@@ -230,7 +223,6 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
 	@Override
@@ -249,7 +241,12 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 
 	@Override
 	public void ack(Message message) throws JMSException {
-		
+		try {
+			this.connection.acknowledgeMessage(message,this);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

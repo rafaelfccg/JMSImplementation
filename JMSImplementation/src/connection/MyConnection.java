@@ -21,8 +21,6 @@ import session.MySession;
 import session.SessionMessageReceiverListener;
 import topic.MyTopic;
 import utils.ClientRequestHandler;
-import utils.Marshaller;
-
 
 public class MyConnection implements Connection, MyConnectionSendMessage {
 
@@ -83,14 +81,12 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	@Override
 	public ConnectionConsumer createConnectionConsumer(Destination arg0, String arg1, ServerSessionPool arg2, int arg3)
 			throws JMSException {
-		// TODO Auto-generated method stub
 		throw new JMSException("Method not Implemented");
 	}
 
 	@Override
 	public ConnectionConsumer createDurableConnectionConsumer(Topic arg0, String arg1, String arg2,
 			ServerSessionPool arg3, int arg4) throws JMSException {
-		// TODO Auto-generated method stub
 		throw new JMSException("Method not Implemented");
 	}
 
@@ -130,13 +126,6 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		exceptionListener = arg0;
 		
 	}
-	private void publisherHandShake(){
-		
-	}
-	
-	private void subscriberHandShake(){
-		
-	}
 
 	@Override
 	public void start() throws JMSException {
@@ -147,9 +136,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 					numberOfTries++;
 					try {
 						receiverConnection = new ClientRequestHandler(hostIp, hostPort, true, getClientID());
-						subscriberHandShake();
 						senderConnection = new ClientRequestHandler(hostIp, hostPort, false, getClientID());
-						publisherHandShake();
 						this.open = true;
 						this.stopped = false;
 						break;
@@ -232,11 +219,16 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		
 	}
 	@Override
-	public void acknowledgeMessage(Message message) throws IOException, JMSException {
+	public void acknowledgeMessage(Message message, Session session) throws IOException, JMSException {
 		isOpen();
 		setModified();
 		//AckQuery
 		//AbstractQuery query = new SubscriberQuery(getClientID(),topic.getTopicName());
 		//publisherConnection.send(query);
+	}
+	@Override
+	public void closeSession(Session session) {
+		// TODO Auto-generated method stub
+		
 	}
 }

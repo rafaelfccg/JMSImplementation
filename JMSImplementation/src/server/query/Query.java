@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 public class Query implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2396198797934569671L;
+
 	private String clientId;
 	
 	private QueryType type;
