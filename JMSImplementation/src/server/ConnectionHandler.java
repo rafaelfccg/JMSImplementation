@@ -15,8 +15,8 @@ import server.query.SubscriberQuery;
 
 enum ConnectionHandlerType{
 	UNKNOWN,
-	CONSUMER,
-	PRODUCER
+	SENDER, // client sends message through this socket, server only listens
+	RECEIVER // client receives message through this socket, server only sends
 }
 
 public class ConnectionHandler implements Runnable{
@@ -64,9 +64,9 @@ public class ConnectionHandler implements Runnable{
 		while(running){
 			try {
 				
-				if(this.type == ConnectionHandlerType.CONSUMER){
+				if(this.type == ConnectionHandlerType.SENDER){
 					doConsumer();
-				}else if(this.type == ConnectionHandlerType.PRODUCER){
+				}else if(this.type == ConnectionHandlerType.RECEIVER){
 					doProducer();
 				}
 				
@@ -113,7 +113,7 @@ public class ConnectionHandler implements Runnable{
 		
 		// Send ACK
 		Query ack = new Query(query.getClientId(), QueryType.ACK);
-		this.server.getProducers().get(query.getClientId()).getToSend().add(ack);
+		this.server.getReceivers().get(query.getClientId()).getToSend().add(ack);
 	}
 	
 	/**
@@ -139,11 +139,11 @@ public class ConnectionHandler implements Runnable{
 		Query query = (Query) this.inputStream.readObject();
 		
 		switch(query.getType()){
-			case REGISTER_CONSUMER:
-				this.handleRegisterConsumer(query);
+			case REGISTER_SENDER:
+				this.handleRegisterSender(query);
 				break;
-			case REGISTER_PRODUCER:
-				this.handleRegisterProducer(query);
+			case REGISTER_RECEIVER:
+				this.handleRegisterReceiver(query);
 				break;
 			default:
 				throw new Exception("Expecting REGISTER_CONSUMER or REGISTER_PRODUCER query.");
@@ -152,37 +152,37 @@ public class ConnectionHandler implements Runnable{
 	}
 
 	/**
-	 * Register this socket as a PRODUCER
+	 * Register this socket as a RECEIVER
 	 * @param query
 	 * @throws IOException
 	 */
-	private void handleRegisterProducer(Query query) throws IOException {
+	private void handleRegisterReceiver(Query query) throws IOException {
 		logger.log(Level.INFO, "Producer registered ({0})", this.id);
-		this.type = ConnectionHandlerType.PRODUCER;
+		this.type = ConnectionHandlerType.RECEIVER;
 		
 		// Send ACK
-		Query ack = new Query(query.getClientId(), QueryType.REGISTER_PRODUCER_ACK);
+		Query ack = new Query(query.getClientId(), QueryType.REGISTER_RECEIVER_ACK);
 		this.outputStream.writeObject(ack);
 		
 		// Register this socket in the server
-		this.server.handleRegisterConsumer(query, this.id);
+		this.server.handleRegisterReceiver(query, this.id);
 	}
 
 	/**
-	 * Register this socket as a CONSUMER
+	 * Register this socket as a SENDER
 	 * @param query
 	 * @throws IOException
 	 */
-	private void handleRegisterConsumer(Query query) throws IOException {
+	private void handleRegisterSender(Query query) throws IOException {
 		logger.log(Level.INFO, "Consumer registered ({0})", this.id);
-		this.type = ConnectionHandlerType.CONSUMER;
+		this.type = ConnectionHandlerType.SENDER;
 		
 		// Send ACK
-		Query ack = new Query(query.getClientId(), QueryType.REGISTER_CONSUMER_ACK);
+		Query ack = new Query(query.getClientId(), QueryType.REGISTER_SENDER_ACK);
 		this.outputStream.writeObject(ack);
 		
 		// Register this socket in the server
-		this.server.handleRegisterConsumer(query, this.id);
+		this.server.handleRegisterSender(query, this.id);
 	}
 
 	private void handleDeleteTopic(Query query) {

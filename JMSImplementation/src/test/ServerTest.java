@@ -16,7 +16,7 @@ public class ServerTest {
 		Socket producerSocket = new Socket("localhost", 12345);
 		ObjectOutputStream producerOutputStream = new ObjectOutputStream(producerSocket.getOutputStream());
 		ObjectInputStream producerInputStream = new ObjectInputStream(producerSocket.getInputStream());
-		Query registerProducerQuery = new Query("123", QueryType.REGISTER_PRODUCER);
+		Query registerProducerQuery = new Query("123", QueryType.REGISTER_SENDER);
 		producerOutputStream.writeObject(registerProducerQuery);
 		Query registerProducerAck = (Query) producerInputStream.readObject();
 		System.out.println("Producer Socket registered " + registerProducerAck.getClientId());
@@ -24,7 +24,7 @@ public class ServerTest {
 		Socket consumerSocket = new Socket("localhost", 12345);
 		ObjectOutputStream consumerOutputStream = new ObjectOutputStream(consumerSocket.getOutputStream());
 		ObjectInputStream consumerInputStream = new ObjectInputStream(consumerSocket.getInputStream());
-		Query registerConsumerQuery = new Query("123", QueryType.REGISTER_CONSUMER);
+		Query registerConsumerQuery = new Query("123", QueryType.REGISTER_RECEIVER);
 		consumerOutputStream.writeObject(registerConsumerQuery);
 		Query registerConsumerAck = (Query) consumerInputStream.readObject();
 		System.out.println("Consumer Socket registered " + registerConsumerAck.getClientId());

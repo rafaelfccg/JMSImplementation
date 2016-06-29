@@ -24,20 +24,22 @@ public class Server {
 	private HashMap<Integer, ConnectionHandler> handlers;
 	
 	/**
-	 * Map of ClientId -> ConnectionHandler for the consumer sockets
+	 * Map of ClientId -> ConnectionHandler for the sender sockets
+	 * Clients only send messages, Server only listens for messages
 	 */
-	private HashMap<String, ConnectionHandler> consumers;
+	private HashMap<String, ConnectionHandler> senders;
 	
 	/**
-	 * Map of ClientId -> ConnectionHandler for the producers sockets
+	 * Map of ClientId -> ConnectionHandler for the receiver sockets
+	 * Clients only receive messages, Server only sends for messages
 	 */
-	private HashMap<String, ConnectionHandler> producers;
+	private HashMap<String, ConnectionHandler> receivers;
 	
 	public Server(int port) throws IOException{
 		this.serverSocket = new ServerSocket(port);
 		this.handlers = new HashMap<Integer, ConnectionHandler>();
-		this.consumers = new HashMap<String, ConnectionHandler>();
-		this.producers = new HashMap<String, ConnectionHandler>();
+		this.senders = new HashMap<String, ConnectionHandler>();
+		this.receivers = new HashMap<String, ConnectionHandler>();
 	}
 	
 	public void init() throws IOException{
@@ -67,12 +69,12 @@ public class Server {
 		
 	}
 
-	public void handleRegisterConsumer(Query query, int handlerId){
-		consumers.put(query.getClientId(), handlers.get(handlerId));
+	public void handleRegisterReceiver(Query query, int handlerId){
+		receivers.put(query.getClientId(), handlers.get(handlerId));
 	}
 	
-	public void handleRegisterProducer(Query query, int handlerId){
-		producers.put(query.getClientId(), handlers.get(handlerId));
+	public void handleRegisterSender(Query query, int handlerId){
+		senders.put(query.getClientId(), handlers.get(handlerId));
 	}
 
 	public void handleSubscribe(SubscriberQuery query, int handlerId) {
@@ -105,20 +107,20 @@ public class Server {
 		this.handlers = handlers;
 	}
 
-	public HashMap<String, ConnectionHandler> getConsumers() {
-		return consumers;
+	public HashMap<String, ConnectionHandler> getSenders() {
+		return senders;
 	}
 
-	public void setConsumers(HashMap<String, ConnectionHandler> consumers) {
-		this.consumers = consumers;
+	public void setSenders(HashMap<String, ConnectionHandler> senders) {
+		this.senders = senders;
 	}
 
-	public HashMap<String, ConnectionHandler> getProducers() {
-		return producers;
+	public HashMap<String, ConnectionHandler> getReceivers() {
+		return receivers;
 	}
 
-	public void setProducers(HashMap<String, ConnectionHandler> producers) {
-		this.producers = producers;
+	public void setReceivers(HashMap<String, ConnectionHandler> receivers) {
+		this.receivers = receivers;
 	}
-	
+
 }

@@ -37,9 +37,9 @@ public class ClientRequestHandler {
 	private void sendType(boolean isSubscriber, String clientId) throws IOException {
 		Query type;
 		if(isSubscriber){
-			type= new Query(clientId, QueryType.REGISTER_CONSUMER);
+			type= new Query(clientId, QueryType.REGISTER_RECEIVER);
 		}else{
-			type= new Query(clientId, QueryType.REGISTER_PRODUCER);
+			type= new Query(clientId, QueryType.REGISTER_SENDER);
 		}
 		send(type);
 		
@@ -47,8 +47,8 @@ public class ClientRequestHandler {
 
 	private void waitAck(boolean isSubscriber) throws ClassNotFoundException, IOException{
 		Query ack = (Query) this.input.readObject();
-		if(isSubscriber && ack.getType() == QueryType.REGISTER_CONSUMER_ACK  ||
-				!isSubscriber && ack.getType() == QueryType.REGISTER_CONSUMER_ACK){
+		if(isSubscriber && ack.getType() == QueryType.REGISTER_RECEIVER_ACK  ||
+				!isSubscriber && ack.getType() == QueryType.REGISTER_SENDER_ACK){
 			return;
 		}
 		throw new IOException("Ack was not received");
