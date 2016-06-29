@@ -65,9 +65,9 @@ public class ConnectionHandler implements Runnable{
 			try {
 				
 				if(this.type == ConnectionHandlerType.SENDER){
-					doConsumer();
+					handleReceivedMessages();
 				}else if(this.type == ConnectionHandlerType.RECEIVER){
-					doProducer();
+					sendMessages();
 				}
 				
 			} catch (Exception e) {
@@ -93,7 +93,7 @@ public class ConnectionHandler implements Runnable{
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 */
-	private void doConsumer() throws ClassNotFoundException, IOException{
+	private void handleReceivedMessages() throws ClassNotFoundException, IOException{
 		Query query = (Query) this.inputStream.readObject();
 
 		switch(query.getType()){
@@ -122,7 +122,7 @@ public class ConnectionHandler implements Runnable{
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	private void doProducer() throws InterruptedException, IOException{
+	private void sendMessages() throws InterruptedException, IOException{
 		
 		Object obj = this.toSend.take();
 		
