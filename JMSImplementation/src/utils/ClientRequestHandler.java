@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import javax.jms.Message;
 
 import connection.MyConnection;
+import server.query.MessageQuery;
 import server.query.Query;
 import server.query.QueryType;
 
@@ -62,9 +63,9 @@ public class ClientRequestHandler {
 	public void send(Object object) throws IOException{
 		this.output.writeObject(object);
 	}
-	public void sendMessageAsync(Message message){
+	public void sendMessageAsync(Query myMessage){
 		MyMessageSender sender = new MyMessageSender();
-		sender.message = message;
+		sender.message = myMessage;
 		Thread senderThread = new Thread(sender);
 		senderThread.start();
 	}
@@ -86,7 +87,7 @@ public class ClientRequestHandler {
 		public void run() {
 			while(!socket.isClosed()){
 				try {
-					Message message = (Message)receive();
+					Query message = (Query)receive();
 					connection.onMessageReceived(message);
 				} catch (ClassNotFoundException e) {
 					System.err.println("Wrong message Type Received");
@@ -99,7 +100,7 @@ public class ClientRequestHandler {
 	}
 	
 	private class MyMessageSender implements Runnable{
-		Message message;
+		Query message;
 		@Override
 		public void run() {
 			if(!socket.isClosed()){

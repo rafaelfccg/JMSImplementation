@@ -15,6 +15,8 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import messages.MyMessage;
+import server.query.MessageQuery;
 import server.query.Query;
 import server.query.SubscriberQuery;
 import session.MySession;
@@ -48,14 +50,17 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 			throw new JMSException("Operation perfomed on closed session");
 		}
 	}
-	public void onMessageReceived(Message message){
+	public void onMessageReceived(Query query){
 		Destination destination;
 		if(!this.stopped){
 			try {
-				destination = message.getJMSDestination();
-				ArrayList<SessionMessageReceiverListener> sessions = this.subscribed.get(destination);
-				for(SessionMessageReceiverListener session : sessions ){
-					session.onMessageReceived(message);
+				if(query instanceof MessageQuery){
+					Message msg = ((MessageQuery) query).getMessage();
+					destination = msg.getJMSDestination();
+					ArrayList<SessionMessageReceiverListener> sessions = this.subscribed.get(destination);
+					for(SessionMessageReceiverListener session : sessions ){
+						session.onMessageReceived(msg);
+					}
 				}
 			} catch (JMSException e) {
 				e.printStackTrace();
@@ -178,7 +183,9 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	public void sendMessage(Message myMessage) throws IOException, JMSException {
 		isOpen();
 		setModified();
-		senderConnection.sendMessageAsync(myMessage);
+		MyMessage msg = (MyMessage) myMessage;
+		Query query = new MessageQuery(getClientID(),msg);
+		senderConnection.sendMessageAsync(query);
 	}
 	
 	private void subscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session){
