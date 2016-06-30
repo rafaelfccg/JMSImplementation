@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import server.query.Query;
 import server.query.QueryType;
 import server.query.SubscriberQuery;
+import server.query.TopicQuery;
 
 enum ConnectionHandlerType{
 	UNKNOWN,
@@ -98,16 +99,16 @@ public class ConnectionHandler implements Runnable{
 
 		switch(query.getType()){
 			case SUBSCRIBE:
-				this.handleSubscribe(query);
+				this.server.handleSubscribe((SubscriberQuery) query);
 				break;
 			case UNSUBSCRIBE:
-				this.handleUnsubscribe(query);
+				this.server.handleUnsubscribe((SubscriberQuery) query);
 				break;
 			case CREATE_TOPIC:
-				this.handleCreateTopic(query);
+				this.server.handleCreateTopic((TopicQuery) query);
 				break;
 			case DELETE_TOPIC:
-				this.handleDeleteTopic(query);
+				this.server.handleDeleteTopic((TopicQuery) query);
 				break;
 			default:
 				break;
@@ -185,25 +186,6 @@ public class ConnectionHandler implements Runnable{
 		
 		// Register this socket in the server
 		this.server.handleRegisterSender(query, this.id);
-	}
-
-	private void handleDeleteTopic(Query query) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void handleCreateTopic(Query query) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void handleUnsubscribe(Query query) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void handleSubscribe(Query query) {
-		// TODO Auto-generated method stub	
 	}
 	
 	public Server getServer() {

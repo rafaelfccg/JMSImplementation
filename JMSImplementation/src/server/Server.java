@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import server.query.Query;
 import server.query.SubscriberQuery;
+import server.query.TopicQuery;
 
 public class Server {
 	
@@ -35,11 +36,14 @@ public class Server {
 	 */
 	private HashMap<String, ConnectionHandler> receivers;
 	
+	private TopicManager topicManager;
+	
 	public Server(int port) throws IOException{
 		this.serverSocket = new ServerSocket(port);
 		this.handlers = new HashMap<Integer, ConnectionHandler>();
 		this.senders = new HashMap<String, ConnectionHandler>();
 		this.receivers = new HashMap<String, ConnectionHandler>();
+		this.topicManager = new TopicManager();
 	}
 	
 	public void init() throws IOException{
@@ -76,11 +80,23 @@ public class Server {
 	public void handleRegisterSender(Query query, int handlerId){
 		senders.put(query.getClientId(), handlers.get(handlerId));
 	}
+	
+	public void handleCreateTopic(TopicQuery query) {
+		this.topicManager.create(query.getName());
+	}
+	
+	public void handleDeleteTopic(TopicQuery query) {
+		this.topicManager.delete(query.getName());
+	}
 
-	public void handleSubscribe(SubscriberQuery query, int handlerId) {
-		
-		logger.log(Level.INFO, "Client subscribed to topic {0}", query.getTopic());
-		
+	public void handleSubscribe(SubscriberQuery query) {
+		logger.log(Level.INFO, "Client {0} subscribed to topic {1}", new Object[]{ query.getClientId(), query.getTopic() });
+		this.topicManager.subscribe(query.getTopic(), query.getClientId());
+	}
+	
+	public void handleUnsubscribe(SubscriberQuery query) {
+		logger.log(Level.INFO, "Client {0} unsubscribed to topic {1}", new Object[]{ query.getClientId(), query.getTopic() });
+		this.topicManager.unsubscribe(query.getTopic(), query.getClientId());
 	}
 
 	public ServerSocket getServerSocket() {
