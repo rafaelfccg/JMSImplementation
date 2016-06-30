@@ -44,6 +44,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 		this.transacted = trans;
 		this.acknowledgeMode = ack;
 		this.connection = connection;
+		this.subscribedList = new HashMap<Destination, ArrayList<MessageListener>>();
 	}
 	
 	@Override
