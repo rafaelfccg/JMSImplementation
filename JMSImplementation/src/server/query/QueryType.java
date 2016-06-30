@@ -10,7 +10,7 @@ public enum QueryType {
 	UNSUBSCRIBE,
 	CREATE_TOPIC,
 	DELETE_TOPIC,
-	PUBLISH,
+	MESSAGE,
 	ACK
 	
 }
