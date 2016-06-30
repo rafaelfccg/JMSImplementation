@@ -37,7 +37,12 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	private HashMap<Destination,ArrayList<SessionMessageReceiverListener>> subscribed;
 	private ArrayList<Session> sessions;
 	
-	
+	public  MyConnection(String hostIp, int hostPort){
+		this.hostPort = hostPort;
+		this.hostIp = hostIp;
+		this.subscribed = new HashMap<Destination,ArrayList<SessionMessageReceiverListener>>();
+		this.sessions = new ArrayList<Session>();
+	}
 	private void isOpen() throws JMSException{
 		if(!this.open){
 			throw new JMSException("Operation perfomed on closed session");
@@ -136,11 +141,14 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 					numberOfTries++;
 					try {
 						receiverConnection = new ClientRequestHandler(hostIp, hostPort, true, getClientID());
+						System.out.println("Connected receiver");
 						senderConnection = new ClientRequestHandler(hostIp, hostPort, false, getClientID());
 						this.open = true;
+						System.out.println("Connected consumer");
 						this.stopped = false;
 						break;
 					} catch (Exception e) {
+						e.printStackTrace();
 						if(receiverConnection != null) receiverConnection.closeConnection();
 						if(senderConnection != null) senderConnection.closeConnection();
 					}
@@ -170,7 +178,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	public void sendMessage(Message myMessage) throws IOException, JMSException {
 		isOpen();
 		setModified();
-		senderConnection.send(myMessage);
+		senderConnection.sendMessageAsync(myMessage);
 	}
 	
 	private void subscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session){

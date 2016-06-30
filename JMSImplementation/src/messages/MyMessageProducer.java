@@ -1,9 +1,13 @@
 package messages;
 
+import java.io.IOException;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
+
+import session.MySessionMessageSend;
 
 public class MyMessageProducer implements MessageProducer{
 
@@ -12,6 +16,13 @@ public class MyMessageProducer implements MessageProducer{
 	private boolean disableMessageTimestamp;
 	private int priority;
 	private long timeToLive;
+	private Destination destination;
+	private MySessionMessageSend sessionSend;
+	
+	public MyMessageProducer(Destination destination, MySessionMessageSend session){
+		this.destination = destination;
+		this.sessionSend = session;
+	}
 	
 	@Override
 	public void close() throws JMSException {
@@ -26,8 +37,7 @@ public class MyMessageProducer implements MessageProducer{
 
 	@Override
 	public Destination getDestination() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		return this.destination;
 	}
 
 	@Override
@@ -52,8 +62,14 @@ public class MyMessageProducer implements MessageProducer{
 
 	@Override
 	public void send(Message arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		
+		try {
+			arg0.setJMSDestination(this.destination);
+			arg0.setJMSPriority(this.priority);
+			arg0.setJMSExpiration(this.timeToLive);
+			this.sessionSend.send(arg0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

@@ -7,9 +7,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 
 public class MyBytesMessage extends MyMessage implements BytesMessage{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1530438025104904723L;
 
 	private byte[] messageBody;
 
@@ -35,7 +42,7 @@ public class MyBytesMessage extends MyMessage implements BytesMessage{
 		if(this.out == null){
 			this.byteOut = new ByteArrayOutputStream();
 			this.out = new DataOutputStream(byteOut);
-			this.out.write(this.messageBody);
+			if(this.messageBody != null) this.out.write(this.messageBody);
 		}
 		return out;
 	}
@@ -410,6 +417,35 @@ public class MyBytesMessage extends MyMessage implements BytesMessage{
 			raise(e);
 		}
 
+	}
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		if (this.out != null) {
+            this.out.flush();
+            this.messageBody = this.byteOut.toByteArray();
+        }
+
+        super.writeExternal(out);
+        out.writeLong(serialVersionUID);
+        out.writeInt(this.messageBody.length);
+        out.write(this.messageBody);
+        out.flush();
+		
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		super.readExternal(in);
+        long version = in.readLong();
+        if (version == serialVersionUID) {
+            int length = in.readInt();
+            this.messageBody = new byte[length];
+            in.readFully(this.messageBody);
+        } else {
+            throw new IOException("Incorrect version enountered: " + version +
+                ". This version = " + serialVersionUID);
+        }
+		
 	}
 
 }

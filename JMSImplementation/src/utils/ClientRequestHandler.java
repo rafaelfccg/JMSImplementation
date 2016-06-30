@@ -28,10 +28,10 @@ public class ClientRequestHandler {
 		this.hostname = hostname;
 		this.port = port;
 		this.socket = new Socket(this.hostname, this.port);
-		sendType(isSubscriber,clientId);
-		waitAck(isSubscriber);
 		this.output = new ObjectOutputStream(this.socket.getOutputStream());
 		this.input = new ObjectInputStream(this.socket.getInputStream());
+		sendType(isSubscriber,clientId);
+		waitAck(isSubscriber);	
 	}
 	
 	private void sendType(boolean isSubscriber, String clientId) throws IOException {

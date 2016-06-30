@@ -2,14 +2,23 @@ package messages;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.Serializable;
 import java.util.Collections;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.Session;
 
-public class MyMessage implements Message {
+public class MyMessage implements Message, Serializable, Externalizable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 958482877712819617L;
 	
 	private Destination destination;
 	private Destination replyTo;
@@ -301,6 +310,18 @@ public class MyMessage implements Message {
 	@Override
 	public void setStringProperty(String arg0, String arg1) throws JMSException {
 		this.properties.put(STRING_PROPERTY, arg1);
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

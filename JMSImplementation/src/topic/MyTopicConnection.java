@@ -11,6 +11,11 @@ import connection.MyConnection;
 
 public class MyTopicConnection extends MyConnection implements TopicConnection{
 
+	public MyTopicConnection(String hostIp, int hostPort) {
+		super(hostIp, hostPort);
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	public ConnectionConsumer createConnectionConsumer(Topic arg0, String arg1, ServerSessionPool arg2, int arg3)
 			throws JMSException {

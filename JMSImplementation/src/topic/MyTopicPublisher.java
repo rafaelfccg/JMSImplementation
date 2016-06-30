@@ -8,8 +8,14 @@ import javax.jms.Topic;
 import javax.jms.TopicPublisher;
 
 import messages.MyMessageProducer;
+import session.MySessionMessageSend;
 
 public class MyTopicPublisher extends MyMessageProducer implements TopicPublisher{
+
+	public MyTopicPublisher(Destination destination, MySessionMessageSend session) {
+		super(destination, session);
+		// TODO Auto-generated constructor stub
+	}
 
 	@Override
 	public Topic getTopic() throws JMSException {

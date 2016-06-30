@@ -26,10 +26,14 @@ import javax.jms.TopicSubscriber;
 
 import connection.MyConnectionSendMessage;
 import messages.MessageAckSession;
+import messages.MyBytesMessage;
 import messages.MyMessageConsumer;
+import messages.MyMessageProducer;
 
-public class MySession implements Session, SessionMessageReceiverListener, MessageAckSession{
+public class MySession implements Session, SessionMessageReceiverListener, MessageAckSession,MySessionMessageSend{
 
+	public final static int AUTO_ACKNOWLEDGE = 1;
+	public final static int CLIENT_ACKNOWLEDGE  = 2;
 	MyConnectionSendMessage connection;
 	boolean transacted;
 	int acknowledgeMode;
@@ -65,8 +69,8 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 
 	@Override
 	public BytesMessage createBytesMessage() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		BytesMessage bmsg = new MyBytesMessage();
+		return bmsg;
 	}
 
 	@Override
@@ -132,8 +136,8 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 
 	@Override
 	public MessageProducer createProducer(Destination arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		MessageProducer msgProducer = new MyMessageProducer(arg0,this);
+		return msgProducer;
 	}
 
 	@Override
@@ -247,6 +251,11 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void send(Message message) throws IOException, JMSException {
+		connection.sendMessage(message);
 	}
 
 }

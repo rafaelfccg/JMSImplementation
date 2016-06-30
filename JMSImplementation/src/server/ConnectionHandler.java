@@ -109,6 +109,8 @@ public class ConnectionHandler implements Runnable{
 			case DELETE_TOPIC:
 				this.handleDeleteTopic(query);
 				break;
+			default:
+				break;
 		}
 		
 		// Send ACK
