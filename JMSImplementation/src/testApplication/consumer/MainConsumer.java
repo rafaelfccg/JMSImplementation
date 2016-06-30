@@ -19,6 +19,7 @@ public class MainConsumer {
 			Connection connection = new MyConnection("localhost",12345);		
 			Session session= connection.createSession(false, MySession.AUTO_ACKNOWLEDGE);
 			Destination topic = new MyTopic("abc");
+			connection.start();
 			MessageConsumer consumer  = session.createConsumer(topic);
 			consumer.setMessageListener(new MessageListener() {
 				
@@ -35,7 +36,7 @@ public class MainConsumer {
 					
 				}
 			});
-			connection.start();
+			
 			
 			
 			
