@@ -8,6 +8,7 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 
 import session.MySessionMessageSend;
+import utils.Utils;
 
 public class MyMessageProducer implements MessageProducer{
 
@@ -66,28 +67,50 @@ public class MyMessageProducer implements MessageProducer{
 			arg0.setJMSDestination(this.destination);
 			arg0.setJMSPriority(this.priority);
 			arg0.setJMSExpiration(this.timeToLive);
+			arg0.setJMSDeliveryMode(this.deliveryMode);
 			this.sessionSend.send(arg0);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.raise(e);
 		}
 	}
 
 	@Override
 	public void send(Destination arg0, Message arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		
+		try {
+			arg1.setJMSDestination(arg0);
+			arg1.setJMSPriority(this.priority);
+			arg1.setJMSExpiration(this.timeToLive);
+			arg1.setJMSDeliveryMode(this.deliveryMode);
+			this.sessionSend.send(arg1);
+		} catch (IOException e) {
+			Utils.raise(e);
+		}
 	}
 
 	@Override
-	public void send(Message arg0, int arg1, int arg2, long arg3) throws JMSException {
-		// TODO Auto-generated method stub
-		
+	public void send(Message arg0, int deliveryMode, int priority, long timeToLive) throws JMSException {
+		try {
+			arg0.setJMSDestination(this.destination);
+			arg0.setJMSPriority(priority);
+			arg0.setJMSExpiration(timeToLive);
+			arg0.setJMSDeliveryMode(this.deliveryMode);
+			this.sessionSend.send(arg0);
+		} catch (IOException e) {
+			Utils.raise(e);
+		}
 	}
 
 	@Override
-	public void send(Destination arg0, Message arg1, int arg2, int arg3, long arg4) throws JMSException {
-		// TODO Auto-generated method stub
-		
+	public void send(Destination arg0, Message arg1, int deliveryMode, int priority, long timeToLive) throws JMSException {
+		try {
+			arg1.setJMSDestination(arg0);
+			arg1.setJMSPriority(priority);
+			arg1.setJMSExpiration(timeToLive);
+			arg1.setJMSDeliveryMode(deliveryMode);
+			this.sessionSend.send(arg1);
+		} catch (IOException e) {
+			Utils.raise(e);
+		}
 	}
 
 	@Override

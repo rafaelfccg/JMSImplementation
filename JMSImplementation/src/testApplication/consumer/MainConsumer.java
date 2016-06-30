@@ -37,7 +37,9 @@ public class MainConsumer {
 				}
 			});
 			
-			
+			while(true){
+				//faz nada só escuta passivamente
+			}
 			
 			
 		} catch (JMSException e) {
