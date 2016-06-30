@@ -76,14 +76,22 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 
 	@Override
 	public MessageConsumer createConsumer(Destination destination) throws JMSException {
-		MyMessageConsumer msgConsumer = new MyMessageConsumer();
-		ArrayList<MessageListener> list = this.subscribedList.get(destination);
-		if( list == null){
-			list = new ArrayList<MessageListener>();
-			this.subscribedList.put(destination, list);
+		try {
+			MyMessageConsumer msgConsumer = new MyMessageConsumer();
+			this.connection.subscribe(destination, this);
+			ArrayList<MessageListener> list = this.subscribedList.get(destination);
+			if( list == null){
+				list = new ArrayList<MessageListener>();
+				this.subscribedList.put(destination, list);
+			}
+			list.add(msgConsumer);
+			return msgConsumer;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new JMSException(e.getMessage());
 		}
-		list.add(msgConsumer);
-		return msgConsumer;
+		
 	}
 
 	@Override
