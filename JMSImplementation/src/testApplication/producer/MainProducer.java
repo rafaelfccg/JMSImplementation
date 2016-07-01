@@ -23,9 +23,14 @@ public class MainProducer {
 			bmsg.writeUTF("This is a test!");
 			producer.send(bmsg);
 			
+			while(true){
+				//espera forever
+			}
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally{
+			
 		}
 	}
 }

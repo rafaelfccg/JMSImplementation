@@ -3,6 +3,7 @@ package connection;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
@@ -44,6 +45,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		this.hostIp = hostIp;
 		this.subscribed = new HashMap<Destination,ArrayList<SessionMessageReceiverListener>>();
 		this.sessions = new ArrayList<Session>();
+		this.clientId = "CLT:"+UUID.randomUUID().toString();
 	}
 	private void isOpen() throws JMSException{
 		if(!this.open){

@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import javax.jms.Message;
+
+import server.query.MessageQuery;
 import server.query.Query;
 import server.query.SubscriberQuery;
 import server.query.TopicQuery;
@@ -137,6 +142,20 @@ public class Server {
 
 	public void setReceivers(HashMap<String, ConnectionHandler> receivers) {
 		this.receivers = receivers;
+	}
+
+	public void handleMessage(MessageQuery query) {
+		Message m =query.getMessage();
+		if(m instanceof BytesMessage){
+			BytesMessage b = (BytesMessage)m;
+			try {
+				String s = b.readUTF();
+				System.out.println("###"+s+"###");
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 
 }

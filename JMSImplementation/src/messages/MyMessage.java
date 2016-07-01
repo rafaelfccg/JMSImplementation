@@ -2,6 +2,7 @@ package messages;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.UUID;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -45,6 +46,10 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	static private final String DOUBLE_PROPERTY = "DOUBLE";
 	static private final String SHORT_PROPERTY = "SHORT";
 	static private final String BYTE_PROPERTY = "BYTE";
+	
+	public MyMessage(){
+		this.jmsMessageId = "MSG:"+UUID.randomUUID().toString();
+	}
 	
 	@Override
 	public void acknowledge() throws JMSException {

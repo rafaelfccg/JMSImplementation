@@ -50,7 +50,8 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	@Override
 	public void close() throws JMSException {
 		connection.closeSession(this);
-		
+		// TODO Auto-generated method stub
+		// check locks on subcribedList
 	}
 
 	@Override

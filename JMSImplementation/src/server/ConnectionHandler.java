@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import server.query.MessageQuery;
 import server.query.Query;
 import server.query.QueryType;
 import server.query.SubscriberQuery;
@@ -73,6 +74,7 @@ public class ConnectionHandler implements Runnable{
 				
 			} catch (Exception e) {
 				this.running = false;
+				e.printStackTrace();
 			}
 		}
 		
@@ -110,13 +112,15 @@ public class ConnectionHandler implements Runnable{
 			case DELETE_TOPIC:
 				this.server.handleDeleteTopic((TopicQuery) query);
 				break;
+			case MESSAGE:
+				this.server.handleMessage((MessageQuery) query);
 			default:
 				break;
 		}
 		
-		// Send ACK
-		Query ack = new Query(query.getClientId(), QueryType.ACK);
-		this.server.getReceivers().get(query.getClientId()).getToSend().add(ack);
+//		// Send ACK
+//		Query ack = new Query(query.getClientId(), QueryType.ACK);
+//		this.server.getReceivers().get(query.getClientId()).getToSend().add(ack);
 	}
 	
 	/**
