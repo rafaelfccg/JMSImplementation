@@ -13,8 +13,9 @@ import session.SessionConsumerOperations;
 
 public class MyTopicSubscriber extends MyMessageConsumer implements TopicSubscriber{
 
-	public MyTopicSubscriber(Destination destination, SessionConsumerOperations owner) {
-		super(destination, owner);
+	public MyTopicSubscriber(Destination destination, String selector, boolean noLocal,
+			SessionConsumerOperations owner) {
+		super(destination, selector, noLocal, owner);
 		// TODO Auto-generated constructor stub
 	}
 

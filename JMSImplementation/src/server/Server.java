@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Topic;
 
 import server.query.MessageQuery;
 import server.query.Query;
@@ -150,6 +151,10 @@ public class Server {
 			BytesMessage b = (BytesMessage)m;
 			try {
 				String s = b.readUTF();
+				Topic topic = (Topic) b.getJMSDestination();
+				System.out.println("###Topic###");
+				System.out.println("###"+topic.getTopicName()+"###");
+				System.out.println("###Message###");
 				System.out.println("###"+s+"###");
 			} catch (JMSException e) {
 				e.printStackTrace();
