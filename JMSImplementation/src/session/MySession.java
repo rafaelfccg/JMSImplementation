@@ -56,16 +56,18 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 		}
 	}
 	@Override
-	public synchronized void close() throws JMSException {
-		if(!closed){
-			closed = true;
-			connection.closeSession(this);
-			for(Destination d : subscribedList.keySet()){
-				ArrayList<MessageListener> arr = this.subscribedList.get(d);
-				for(MessageListener msg : arr){
-					if(msg instanceof MessageConsumer){
-						MessageConsumer msgC = (MessageConsumer) msg;
-						msgC.close();
+	public void close() throws JMSException {
+		synchronized (this) {
+			if(!closed){
+				closed = true;
+				connection.closeSession(this);
+				for(Destination d : subscribedList.keySet()){
+					ArrayList<MessageListener> arr = this.subscribedList.get(d);
+					for(MessageListener msg : arr){
+						if(msg instanceof MessageConsumer){
+							MessageConsumer msgC = (MessageConsumer) msg;
+							msgC.close();
+						}
 					}
 				}
 			}

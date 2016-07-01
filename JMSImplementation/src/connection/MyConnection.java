@@ -153,6 +153,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 						this.open = true;
 						System.out.println("Connected consumer");
 						this.stopped = false;
+						this.receiverConnection.startMessageReceving();
 						break;
 					} catch (Exception e) {
 						e.printStackTrace();

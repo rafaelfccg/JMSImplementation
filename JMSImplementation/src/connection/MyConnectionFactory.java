@@ -6,17 +6,17 @@ import javax.jms.JMSException;
 
 public class MyConnectionFactory implements ConnectionFactory{
 	
-	private String providerIp;
-	private String providerPort;
+	protected String providerIp;
+	protected int providerPort;
 	
-	public MyConnectionFactory(String ip, String port) {
+	public MyConnectionFactory(String ip, int port) {
 		this.providerIp = ip;
 		this.providerPort = port;
 	}
 
 	@Override
 	public Connection createConnection() throws JMSException {
-		return (Connection) new MyConnectionFactory(this.providerIp, this.providerPort);
+		return (Connection) new MyConnection(this.providerIp, this.providerPort);
 	}
 
 	@Override

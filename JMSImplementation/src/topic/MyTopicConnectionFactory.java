@@ -8,10 +8,13 @@ import connection.MyConnectionFactory;
 
 public class MyTopicConnectionFactory extends MyConnectionFactory implements TopicConnectionFactory {
 
+	public MyTopicConnectionFactory(String ip, int port) {
+		super(ip, port);
+	}
+
 	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		return new MyTopicConnection(this.providerIp,this.providerPort);
 	}
 
 	@Override

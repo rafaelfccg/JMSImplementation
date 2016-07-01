@@ -13,7 +13,6 @@ public class MyTopicConnection extends MyConnection implements TopicConnection{
 
 	public MyTopicConnection(String hostIp, int hostPort) {
 		super(hostIp, hostPort);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
