@@ -37,16 +37,6 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	
 	MessageAckSession sessionAck;
 	
-	static private final String BOOLEAN_PROPERTY = "BOOLEAN";
-	static private final String OBJECT_PROPERTY = "OBJECT";
-	static private final String STRING_PROPERTY = "STRING";
-	static private final String INTEGER_PROPERTY = "INTEGER";
-	static private final String FLOAT_PROPERTY = "FLOAT";
-	static private final String LONG_PROPERTY = "LONG";
-	static private final String DOUBLE_PROPERTY = "DOUBLE";
-	static private final String SHORT_PROPERTY = "SHORT";
-	static private final String BYTE_PROPERTY = "BYTE";
-	
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeObject(destination);
@@ -97,7 +87,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public boolean getBooleanProperty(String arg0) throws JMSException {
-		Object b = this.properties.get(MyMessage.BOOLEAN_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b instanceof Boolean){
 			return (Boolean) b;
 		}
@@ -106,7 +96,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public byte getByteProperty(String arg0) throws JMSException {
-		Object b = this.properties.get(MyMessage.BYTE_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b instanceof Byte){
 			return (Byte) b;
 		}
@@ -115,7 +105,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public double getDoubleProperty(String arg0) throws JMSException {
-		Object b = this.properties.get(MyMessage.DOUBLE_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b instanceof Double){
 			return (Double) b;
 		}
@@ -124,7 +114,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public float getFloatProperty(String arg0) throws JMSException {
-		Object b = this.properties.get(MyMessage.FLOAT_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b instanceof Float){
 			return (Float) b;
 		}
@@ -133,7 +123,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public int getIntProperty(String arg0) throws JMSException {
-		Object b = this.properties.get(MyMessage.INTEGER_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b instanceof Integer){
 			return (Integer) b;
 		}
@@ -198,7 +188,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public long getLongProperty(String arg0) throws JMSException {
-		Object b = this.properties.get(MyMessage.LONG_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b instanceof Long){
 			return (Long) b;
 		}
@@ -207,9 +197,9 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public Object getObjectProperty(String arg0) throws JMSException {		
-		Object b = this.properties.get(MyMessage.OBJECT_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b != null){
-			return (Byte) b;
+			return b;
 		}
 		throw new JMSException("No Object Propety");
 	}
@@ -221,7 +211,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public short getShortProperty(String arg0) throws JMSException {
-		Object b = this.properties.get(MyMessage.SHORT_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b instanceof Short){
 			return (Short) b;
 		}
@@ -230,7 +220,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public String getStringProperty(String arg0) throws JMSException {
-		Object b = this.properties.get(MyMessage.STRING_PROPERTY);
+		Object b = this.properties.get(arg0);
 		if(b instanceof String){
 			return (String) b;
 		}
@@ -244,28 +234,28 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public void setBooleanProperty(String arg0, boolean arg1) throws JMSException {
-		this.properties.put(BOOLEAN_PROPERTY, new Boolean(arg1));
+		this.properties.put(arg0, new Boolean(arg1));
 	}
 
 	@Override
 	public void setByteProperty(String arg0, byte arg1) throws JMSException {
-		this.properties.put(BYTE_PROPERTY, new Byte(arg1));
+		this.properties.put(arg0, new Byte(arg1));
 		
 	}
 
 	@Override
 	public void setDoubleProperty(String arg0, double arg1) throws JMSException {
-		this.properties.put(DOUBLE_PROPERTY, new Double(arg1));
+		this.properties.put(arg0, new Double(arg1));
 	}
 
 	@Override
 	public void setFloatProperty(String arg0, float arg1) throws JMSException {
-		this.properties.put(FLOAT_PROPERTY, new Float(arg1));
+		this.properties.put(arg0, new Float(arg1));
 	}
 
 	@Override
 	public void setIntProperty(String arg0, int arg1) throws JMSException {
-		this.properties.put(INTEGER_PROPERTY, new Integer(arg1));
+		this.properties.put(arg0, new Integer(arg1));
 	}
 
 	@Override
@@ -325,22 +315,22 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public void setLongProperty(String arg0, long arg1) throws JMSException {
-		this.properties.put(LONG_PROPERTY, new Long(arg1));
+		this.properties.put(arg0, new Long(arg1));
 	}
 
 	@Override
 	public void setObjectProperty(String arg0, Object arg1) throws JMSException {
-		this.properties.put(OBJECT_PROPERTY, arg1);
+		this.properties.put(arg0, arg1);
 	}
 
 	@Override
 	public void setShortProperty(String arg0, short arg1) throws JMSException {
-		this.properties.put(SHORT_PROPERTY, new Short(arg1));
+		this.properties.put(arg0, new Short(arg1));
 	}
 
 	@Override
 	public void setStringProperty(String arg0, String arg1) throws JMSException {
-		this.properties.put(STRING_PROPERTY, arg1);
+		this.properties.put(arg0, arg1);
 	}
 
 }
