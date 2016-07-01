@@ -60,8 +60,10 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 					Message msg = ((MessageQuery) query).getMessage();
 					destination = msg.getJMSDestination();
 					ArrayList<SessionMessageReceiverListener> sessions = this.subscribed.get(destination);
-					for(SessionMessageReceiverListener session : sessions ){
-						session.onMessageReceived(msg);
+					if(sessions != null){
+						for(SessionMessageReceiverListener session : sessions ){
+							session.onMessageReceived(msg);
+						}
 					}
 				}
 			} catch (JMSException e) {
@@ -151,8 +153,10 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 						System.out.println("Connected receiver");
 						senderConnection = new ClientRequestHandler(hostIp, hostPort, false, getClientID());
 						this.open = true;
-						System.out.println("Connected consumer");
+						System.out.println("Connected sender");
 						this.stopped = false;
+						this.receiverConnection.setConnection(this);
+						this.senderConnection.setConnection(this);
 						this.receiverConnection.startMessageReceving();
 						break;
 					} catch (Exception e) {

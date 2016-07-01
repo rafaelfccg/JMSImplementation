@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jms.Message;
 
@@ -23,11 +24,13 @@ public class ClientRequestHandler {
 	private ObjectInputStream input;
 	
 	private MyConnection connection;
+	ReentrantLock lock;
 	
 	
 	public ClientRequestHandler(String hostname, int port,boolean isSubscriber, String clientId) throws UnknownHostException, ClassNotFoundException , IOException{
 		this.hostname = hostname;
 		this.port = port;
+		lock = new ReentrantLock();
 		this.socket = new Socket(this.hostname, this.port);
 		this.output = new ObjectOutputStream(this.socket.getOutputStream());
 		this.input = new ObjectInputStream(this.socket.getInputStream());
@@ -74,6 +77,12 @@ public class ClientRequestHandler {
 		return object;
 	}
 	
+	public void setConnection(MyConnection connection){
+		lock.lock();
+		this.connection = connection;
+		lock.unlock();
+	}
+	
 	public void closeConnection() throws IOException{
 		this.socket.close();
 	}
@@ -83,12 +92,15 @@ public class ClientRequestHandler {
 	}
 	
 	private class MyMessageReceiver implements Runnable{
+		
 		@Override
 		public void run() {
 			while(!socket.isClosed()){
 				try {
 					Query message = (Query)receive();
-					connection.onMessageReceived(message);
+					lock.lock();
+					if(connection!= null)connection.onMessageReceived(message);
+					lock.unlock();
 				} catch (ClassNotFoundException e) {
 					System.err.println("Wrong message Type Received");
 					e.printStackTrace();
