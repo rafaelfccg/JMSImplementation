@@ -1,5 +1,6 @@
 package topic;
 
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -8,8 +9,14 @@ import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
 import messages.MyMessageConsumer;
+import session.SessionConsumerOperations;
 
 public class MyTopicSubscriber extends MyMessageConsumer implements TopicSubscriber{
+
+	public MyTopicSubscriber(Destination destination, SessionConsumerOperations owner) {
+		super(destination, owner);
+		// TODO Auto-generated constructor stub
+	}
 
 	@Override
 	public boolean getNoLocal() throws JMSException {
