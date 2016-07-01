@@ -9,6 +9,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
+import javax.jms.JMSException;
 import server.query.MessageQuery;
 import server.query.Query;
 import server.query.QueryType;
@@ -95,8 +97,9 @@ public class ConnectionHandler implements Runnable{
 	 * Receives a message, handles it and then sends the ACK.
 	 * @throws ClassNotFoundException
 	 * @throws IOException
+	 * @throws JMSException 
 	 */
-	private void handleReceivedMessages() throws ClassNotFoundException, IOException{
+	private void handleReceivedMessages() throws ClassNotFoundException, IOException, JMSException{
 		Query query = (Query) this.inputStream.readObject();
 
 		switch(query.getType()){
@@ -114,6 +117,7 @@ public class ConnectionHandler implements Runnable{
 				break;
 			case MESSAGE:
 				this.server.handleMessage((MessageQuery) query);
+				break;
 			default:
 				break;
 		}

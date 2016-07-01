@@ -6,16 +6,17 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Topic;
 
+import messages.MyBytesMessage;
 import server.query.MessageQuery;
 import server.query.Query;
 import server.query.SubscriberQuery;
 import server.query.TopicQuery;
+import topic.MyTopic;
 
 public class Server {
 	
@@ -58,7 +59,7 @@ public class Server {
 			
 			Socket socket = this.serverSocket.accept();
 			
-			logger.log(Level.INFO, "Client connected ({0})", socket.getInetAddress());
+			logger.log(Level.INFO, "Socket connected ({0})", socket.getInetAddress());
 			
 			try{
 				
@@ -98,13 +99,33 @@ public class Server {
 	public void handleSubscribe(SubscriberQuery query) {
 		logger.log(Level.INFO, "Client {0} subscribed to topic {1}", new Object[]{ query.getClientId(), query.getTopic() });
 		this.topicManager.subscribe(query.getTopic(), query.getClientId());
+		System.out.println(this.topicManager.dump());
 	}
 	
 	public void handleUnsubscribe(SubscriberQuery query) {
 		logger.log(Level.INFO, "Client {0} unsubscribed to topic {1}", new Object[]{ query.getClientId(), query.getTopic() });
 		this.topicManager.unsubscribe(query.getTopic(), query.getClientId());
+		System.out.println(this.topicManager.dump());
 	}
-
+	
+	public void handleMessage(MessageQuery query) {
+		Message m =query.getMessage();
+		if(m instanceof BytesMessage){
+			BytesMessage b = (BytesMessage)m;
+			try {
+				String s = b.readUTF();
+				Topic topic = (Topic) b.getJMSDestination();
+				System.out.println("###Topic###");
+				System.out.println("###"+topic.getTopicName()+"###");
+				System.out.println("###Message###");
+				System.out.println("###"+s+"###");
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
 	public ServerSocket getServerSocket() {
 		return serverSocket;
 	}
@@ -143,24 +164,6 @@ public class Server {
 
 	public void setReceivers(HashMap<String, ConnectionHandler> receivers) {
 		this.receivers = receivers;
-	}
-
-	public void handleMessage(MessageQuery query) {
-		Message m =query.getMessage();
-		if(m instanceof BytesMessage){
-			BytesMessage b = (BytesMessage)m;
-			try {
-				String s = b.readUTF();
-				Topic topic = (Topic) b.getJMSDestination();
-				System.out.println("###Topic###");
-				System.out.println("###"+topic.getTopicName()+"###");
-				System.out.println("###Message###");
-				System.out.println("###"+s+"###");
-			} catch (JMSException e) {
-				e.printStackTrace();
-			}
-		}
-		
 	}
 
 }
