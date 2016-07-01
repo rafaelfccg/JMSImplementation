@@ -79,6 +79,7 @@ public class TopicManager {
 		
 		for(String component : components){
 			curr = curr.getChildren().get(component);
+			if(curr == null) break;
 			subscribed.addAll(curr.getSubscribed());
 		}
 		
