@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -108,22 +109,19 @@ public class Server {
 		System.out.println(this.topicManager.dump());
 	}
 	
-	public void handleMessage(MessageQuery query) {
-		Message m =query.getMessage();
-		if(m instanceof BytesMessage){
-			BytesMessage b = (BytesMessage)m;
-			try {
-				String s = b.readUTF();
-				Topic topic = (Topic) b.getJMSDestination();
-				System.out.println("###Topic###");
-				System.out.println("###"+topic.getTopicName()+"###");
-				System.out.println("###Message###");
-				System.out.println("###"+s+"###");
-			} catch (JMSException e) {
-				e.printStackTrace();
-			}
-		}
+	public void handleMessage(MessageQuery query) throws JMSException, InterruptedException {
+		Message message = query.getMessage();
+		MyTopic topic = (MyTopic) message.getJMSDestination();
 		
+		logger.log(Level.INFO, "Message received from {0} (topic: {1})", 
+				new Object[]{ query.getClientId(), topic.getTopicName() });
+		
+		ArrayList<String> subscribed = this.topicManager.getSubscribed(topic.getTopicName());
+		
+		logger.log(Level.INFO, "Distributing message to {0} consumers", subscribed.size());
+		for(String clientId : subscribed){
+			this.receivers.get(clientId).getToSend().put(query);
+		}
 	}
 	
 	public ServerSocket getServerSocket() {

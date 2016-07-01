@@ -25,6 +25,7 @@ public class MainConsumer {
 				
 				@Override
 				public void onMessage(Message arg0) {
+					System.out.println("Message received");
 					if(arg0 instanceof BytesMessage){
 						try {
 							BytesMessage msg = (BytesMessage)arg0;

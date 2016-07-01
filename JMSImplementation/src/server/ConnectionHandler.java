@@ -98,8 +98,9 @@ public class ConnectionHandler implements Runnable{
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 * @throws JMSException 
+	 * @throws InterruptedException 
 	 */
-	private void handleReceivedMessages() throws ClassNotFoundException, IOException, JMSException{
+	private void handleReceivedMessages() throws ClassNotFoundException, IOException, JMSException, InterruptedException{
 		Query query = (Query) this.inputStream.readObject();
 
 		switch(query.getType()){
@@ -135,9 +136,9 @@ public class ConnectionHandler implements Runnable{
 	 */
 	private void sendMessages() throws InterruptedException, IOException{
 		
-		Object obj = this.toSend.take();
+		Query query = (Query) this.toSend.take();
 		
-		this.outputStream.writeObject(obj);
+		this.outputStream.writeObject(query);
 		
 	}
 
