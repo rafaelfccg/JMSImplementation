@@ -63,9 +63,9 @@ public class ClientRequestHandler {
 	public void send(Object object) throws IOException{
 		this.output.writeObject(object);
 	}
-	public void sendMessageAsync(Query myMessage){
+	public void sendMessageAsync(Query query){
 		MyMessageSender sender = new MyMessageSender();
-		sender.message = myMessage;
+		sender.message = query;
 		Thread senderThread = new Thread(sender);
 		senderThread.start();
 	}

@@ -86,7 +86,6 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 					return this.messageQueue.remove();
 				}
 			}
-			
 		} catch (InterruptedException e) {
 			Utils.raise(e);
 		}finally{

@@ -47,6 +47,32 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	static private final String SHORT_PROPERTY = "SHORT";
 	static private final String BYTE_PROPERTY = "BYTE";
 	
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeObject(destination);
+		out.writeObject(replyTo);
+		out.writeObject(this.jmsMessageId);
+		out.writeObject(this.jmsCorrelationId);
+		out.writeObject(this.jmsType);
+		out.writeObject(this.jmsDeliveryMode);
+		out.writeObject(this.timestamp);
+		out.writeObject(this.timeToLive);
+		out.flush();
+		
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		destination = (Destination)in.readObject();
+		this.replyTo = (Destination)in.readObject();
+		this.jmsMessageId = (String) in.readObject();
+		this.jmsCorrelationId = (String) in.readObject();
+		this.jmsType = (String)in.readObject();
+		this.jmsDeliveryMode = (Integer) in.readObject();
+		this.timestamp = (Long)in.readObject();
+		this.timeToLive =  (Long)in.readObject();
+	}
+	
 	public MyMessage(){
 		this.jmsMessageId = "MSG:"+UUID.randomUUID().toString();
 	}
@@ -315,18 +341,6 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	@Override
 	public void setStringProperty(String arg0, String arg1) throws JMSException {
 		this.properties.put(STRING_PROPERTY, arg1);
-	}
-
-	@Override
-	public void writeExternal(ObjectOutput out) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
