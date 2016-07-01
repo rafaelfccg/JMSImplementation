@@ -39,14 +39,14 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	boolean transacted;
 	int acknowledgeMode;
 	MessageListener messageListener;
-	HashMap<Destination, ArrayList<MessageListener>> subscribedList;
+	HashMap<String, ArrayList<MessageListener>> subscribedList;
 	boolean closed;
 	
 	public MySession(boolean trans, int ack, MyConnectionSendMessage connection){
 		this.transacted = trans;
 		this.acknowledgeMode = ack;
 		this.connection = connection;
-		this.subscribedList = new HashMap<Destination, ArrayList<MessageListener>>();
+		this.subscribedList = new HashMap<String, ArrayList<MessageListener>>();
 		closed = false;
 	}
 	
@@ -61,7 +61,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 			if(!closed){
 				closed = true;
 				connection.closeSession(this);
-				for(Destination d : subscribedList.keySet()){
+				for(String d : subscribedList.keySet()){
 					ArrayList<MessageListener> arr = this.subscribedList.get(d);
 					for(MessageListener msg : arr){
 						if(msg instanceof MessageConsumer){
@@ -111,12 +111,13 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 		try {
 			MyMessageConsumer msgConsumer = new MyMessageConsumer(destination, selector,noLocal,this);
 			this.connection.subscribe(destination, this);
-			ArrayList<MessageListener> list = this.subscribedList.get(destination);
+			Topic topic  = (Topic) destination;
+			ArrayList<MessageListener> list = this.subscribedList.get(topic.getTopicName());
 			if( list == null){
 				list = new ArrayList<MessageListener>();
-				this.subscribedList.put(destination, list);
 			}
 			list.add(msgConsumer);
+			this.subscribedList.put(topic.getTopicName(), list);
 			return msgConsumer;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -253,10 +254,11 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public void onMessageReceived(Message message) {
-		Destination destination;
+		Topic destination;
 		try {
-			destination = message.getJMSDestination();
-			ArrayList<MessageListener> consumers = this.subscribedList.get(destination);
+			destination = (Topic)message.getJMSDestination();
+			ArrayList<MessageListener> consumers = this.subscribedList.get(destination.getTopicName());
+			
 			for(MessageListener consumer : consumers ){
 				consumer.onMessage(message);
 			}
@@ -280,8 +282,9 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	}
 
 	@Override
-	public void closeConsumer(MyMessageConsumer consumer) {
-		ArrayList<MessageListener> arr = this.subscribedList.get(consumer.getDestination());
+	public void closeConsumer(MyMessageConsumer consumer) throws JMSException {
+		Topic topic = (Topic)consumer.getDestination();
+		ArrayList<MessageListener> arr = this.subscribedList.get(topic.getTopicName());
 		arr.remove(consumer);
 		
 	}

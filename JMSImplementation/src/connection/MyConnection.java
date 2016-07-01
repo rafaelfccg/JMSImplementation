@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
@@ -37,13 +38,14 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	private boolean open = false;
 	private boolean stopped = false;
 	private boolean modified = false;
-	private HashMap<Destination,ArrayList<SessionMessageReceiverListener>> subscribed;
+	private HashMap<String,ArrayList<SessionMessageReceiverListener>> subscribed;
 	private ArrayList<Session> sessions;
+	ReentrantLock lock = new ReentrantLock();
 	
 	public  MyConnection(String hostIp, int hostPort){
 		this.hostPort = hostPort;
 		this.hostIp = hostIp;
-		this.subscribed = new HashMap<Destination,ArrayList<SessionMessageReceiverListener>>();
+		this.subscribed = new HashMap<String,ArrayList<SessionMessageReceiverListener>>();
 		this.sessions = new ArrayList<Session>();
 		this.clientId = "CLT:"+UUID.randomUUID().toString();
 	}
@@ -53,13 +55,17 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		}
 	}
 	public void onMessageReceived(Query query){
-		Destination destination;
+		Topic destination;
 		if(!this.stopped){
 			try {
 				if(query instanceof MessageQuery){
 					Message msg = ((MessageQuery) query).getMessage();
-					destination = msg.getJMSDestination();
-					ArrayList<SessionMessageReceiverListener> sessions = this.subscribed.get(destination);
+					destination = (Topic)msg.getJMSDestination();
+					lock.lock();
+					ArrayList<SessionMessageReceiverListener> sessions = this.subscribed.get(destination.getTopicName());
+					String[] arr2 = new String[1];
+					this.subscribed.keySet().toArray(arr2);
+					System.out.println(arr2[0]);
 					if(sessions != null){
 						for(SessionMessageReceiverListener session : sessions ){
 							session.onMessageReceived(msg);
@@ -68,6 +74,8 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 				}
 			} catch (JMSException e) {
 				e.printStackTrace();
+			}finally{
+				if(lock.isLocked())lock.unlock();
 			}
 		}
 		
@@ -195,26 +203,37 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		senderConnection.sendMessageAsync(query);
 	}
 	
-	private void subscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session){
-		ArrayList<SessionMessageReceiverListener> arr = this.subscribed.get(destination);
+	private void subscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session) throws JMSException{
+		lock.lock();
+		Topic topic  = (Topic) destination;
+		ArrayList<SessionMessageReceiverListener> arr = this.subscribed.get(topic.getTopicName());
 		if(arr == null){
 			arr = new ArrayList<SessionMessageReceiverListener>();
-			this.subscribed.put(destination, arr);
+			arr.add(session);
 		}else{
 			if(!arr.contains(session)){
 				arr.add(session);
 			}
 		}
+		this.subscribed.put(topic.getTopicName(), arr);
+		lock.unlock();
 	}
 	
 	private boolean unsubscribeSessionToDestination(Destination destination, SessionMessageReceiverListener session) throws JMSException{
-		ArrayList<SessionMessageReceiverListener> arr = this.subscribed.get(destination);
-		if(arr == null){
-			throw new JMSException("Try to unsubscribe from a topic you have not subscribed before");
-		}else{
-			arr.remove(session);
-			if(arr.isEmpty()) return true;
-			else return false;
+		
+		try{
+			lock.lock();
+			Topic topic  = (Topic) destination;
+			ArrayList<SessionMessageReceiverListener> arr = this.subscribed.get(topic.getTopicName());
+			if(arr == null){
+				throw new JMSException("Try to unsubscribe from a topic you have not subscribed before");
+			}else{
+				arr.remove(session);
+				if(arr.isEmpty()) return true;
+				else return false;
+			}
+		}finally{
+			lock.unlock();
 		}
 	}
 	@Override

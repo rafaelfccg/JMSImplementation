@@ -35,6 +35,7 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 		this.messageQueue = new LinkedList<Message>(); 
 		this.selector = selector;
 		this.noLocal = noLocal;
+		this.lock = new ReentrantLock();
 	}
 	@Override
 	public void close() throws JMSException {
