@@ -29,6 +29,7 @@ import messages.MessageAckSession;
 import messages.MyBytesMessage;
 import messages.MyMessageConsumer;
 import messages.MyMessageProducer;
+import utils.Utils;
 
 public class MySession implements Session, SessionMessageReceiverListener, SessionConsumerOperations, MessageAckSession,MySessionMessageSend{
 
@@ -39,24 +40,41 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	int acknowledgeMode;
 	MessageListener messageListener;
 	HashMap<Destination, ArrayList<MessageListener>> subscribedList;
+	boolean closed;
 	
 	public MySession(boolean trans, int ack, MyConnectionSendMessage connection){
 		this.transacted = trans;
 		this.acknowledgeMode = ack;
 		this.connection = connection;
 		this.subscribedList = new HashMap<Destination, ArrayList<MessageListener>>();
+		closed = false;
 	}
 	
+	public void isOpen() throws JMSException{
+		if(closed){
+			throw new JMSException("Consumer closed");
+		}
+	}
 	@Override
-	public void close() throws JMSException {
-		connection.closeSession(this);
-		// TODO Auto-generated method stub
-		// check locks on subcribedList
+	public synchronized void close() throws JMSException {
+		if(!closed){
+			closed = true;
+			connection.closeSession(this);
+			for(Destination d : subscribedList.keySet()){
+				ArrayList<MessageListener> arr = this.subscribedList.get(d);
+				for(MessageListener msg : arr){
+					if(msg instanceof MessageConsumer){
+						MessageConsumer msgC = (MessageConsumer) msg;
+						msgC.close();
+					}
+				}
+			}
+		}
 	}
 
 	@Override
 	public void commit() throws JMSException {
-		// TODO Auto-generated method stub
+		throw new IllegalStateException("this JMS implementation does not implement transacted Sessions");
 	}
 
 	@Override
@@ -77,8 +95,19 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public MessageConsumer createConsumer(Destination destination) throws JMSException {
+		return createConsumer(destination, null, false);
+	}
+
+	@Override
+	public MessageConsumer createConsumer(Destination destination, String selector) throws JMSException {
+		return createConsumer(destination, selector, false);
+	}
+
+	@Override
+	public MessageConsumer createConsumer(Destination destination, String selector, boolean noLocal) throws JMSException {
+		isOpen();
 		try {
-			MyMessageConsumer msgConsumer = new MyMessageConsumer(destination, this);
+			MyMessageConsumer msgConsumer = new MyMessageConsumer(destination, selector,noLocal,this);
 			this.connection.subscribe(destination, this);
 			ArrayList<MessageListener> list = this.subscribedList.get(destination);
 			if( list == null){
@@ -92,19 +121,6 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 			e.printStackTrace();
 			throw new JMSException(e.getMessage());
 		}
-		
-	}
-
-	@Override
-	public MessageConsumer createConsumer(Destination arg0, String arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public MessageConsumer createConsumer(Destination arg0, String arg1, boolean arg2) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -146,6 +162,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public MessageProducer createProducer(Destination arg0) throws JMSException {
+		isOpen();
 		MessageProducer msgProducer = new MyMessageProducer(arg0,this);
 		return msgProducer;
 	}
@@ -167,20 +184,17 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public TemporaryTopic createTemporaryTopic() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
 	public TextMessage createTextMessage() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
 	public TextMessage createTextMessage(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
@@ -191,8 +205,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public int getAcknowledgeMode() throws JMSException {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.acknowledgeMode;
 	}
 
 	@Override
@@ -202,8 +215,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public boolean getTransacted() throws JMSException {
-		// TODO Auto-generated method stub
-		return false;
+		throw new IllegalStateException("this JMS implementation does not implement transacted Sessions");
 	}
 
 	@Override
@@ -214,8 +226,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public void rollback() throws JMSException {
-		// TODO Auto-generated method stub
-		
+		throw new IllegalStateException("this JMS implementation does not implement transacted Sessions");
 	}
 
 	@Override
@@ -234,8 +245,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 		try {
 			this.connection.unsubscribe(arg0, this);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.raise(e);
 		}
 	}
 
@@ -258,8 +268,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 		try {
 			this.connection.acknowledgeMessage(message,this);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.raise(e);
 		}
 	}
 

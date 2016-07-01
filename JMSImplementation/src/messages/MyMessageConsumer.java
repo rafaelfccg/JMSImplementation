@@ -24,15 +24,17 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 	private ReentrantLock lock;
 	private AtomicInteger operationsInProgress;
 	private boolean closed;
+	boolean noLocal;
 	SessionConsumerOperations owner;
 	
 	
-	public MyMessageConsumer(Destination destination, SessionConsumerOperations owner){
+	public MyMessageConsumer(Destination destination, String selector, boolean noLocal,SessionConsumerOperations owner){
 		this.owner = owner;
 		this.destination = destination;
 		this.operationsInProgress = new AtomicInteger(0);
-		this.messageQueue = new LinkedList<Message>(); {
-		};
+		this.messageQueue = new LinkedList<Message>(); 
+		this.selector = selector;
+		this.noLocal = noLocal;
 	}
 	@Override
 	public void close() throws JMSException {
