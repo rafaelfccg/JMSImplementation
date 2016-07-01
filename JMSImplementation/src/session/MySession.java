@@ -30,7 +30,7 @@ import messages.MyBytesMessage;
 import messages.MyMessageConsumer;
 import messages.MyMessageProducer;
 
-public class MySession implements Session, SessionMessageReceiverListener, MessageAckSession,MySessionMessageSend{
+public class MySession implements Session, SessionMessageReceiverListener, SessionConsumerOperations, MessageAckSession,MySessionMessageSend{
 
 	public final static int AUTO_ACKNOWLEDGE = 1;
 	public final static int CLIENT_ACKNOWLEDGE  = 2;
@@ -77,7 +77,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 	@Override
 	public MessageConsumer createConsumer(Destination destination) throws JMSException {
 		try {
-			MyMessageConsumer msgConsumer = new MyMessageConsumer();
+			MyMessageConsumer msgConsumer = new MyMessageConsumer(destination, this);
 			this.connection.subscribe(destination, this);
 			ArrayList<MessageListener> list = this.subscribedList.get(destination);
 			if( list == null){
@@ -265,6 +265,13 @@ public class MySession implements Session, SessionMessageReceiverListener, Messa
 	@Override
 	public void send(Message message) throws IOException, JMSException {
 		connection.sendMessage(message);
+	}
+
+	@Override
+	public void closeConsumer(MyMessageConsumer consumer) {
+		ArrayList<MessageListener> arr = this.subscribedList.get(consumer.getDestination());
+		arr.remove(consumer);
+		
 	}
 
 }

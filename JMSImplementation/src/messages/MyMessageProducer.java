@@ -27,8 +27,8 @@ public class MyMessageProducer implements MessageProducer{
 	
 	@Override
 	public void close() throws JMSException {
-		// TODO Auto-generated method stub
-		
+		this.destination = null;
+		this.sessionSend = null;
 	}
 
 	@Override
@@ -69,7 +69,9 @@ public class MyMessageProducer implements MessageProducer{
 			arg0.setJMSExpiration(this.timeToLive);
 			arg0.setJMSDeliveryMode(this.deliveryMode);
 			this.sessionSend.send(arg0);
-		} catch (IOException e) {
+		} catch(NullPointerException exp){
+			throw new JMSException("This producer is closed");
+		}catch (Exception e) {
 			Utils.raise(e);
 		}
 	}
@@ -82,7 +84,9 @@ public class MyMessageProducer implements MessageProducer{
 			arg1.setJMSExpiration(this.timeToLive);
 			arg1.setJMSDeliveryMode(this.deliveryMode);
 			this.sessionSend.send(arg1);
-		} catch (IOException e) {
+		} catch(NullPointerException exp){
+			throw new JMSException("This producer is closed");
+		} catch (Exception e) {
 			Utils.raise(e);
 		}
 	}
@@ -95,7 +99,9 @@ public class MyMessageProducer implements MessageProducer{
 			arg0.setJMSExpiration(timeToLive);
 			arg0.setJMSDeliveryMode(this.deliveryMode);
 			this.sessionSend.send(arg0);
-		} catch (IOException e) {
+		} catch(NullPointerException exp){
+			throw new JMSException("This producer is closed");
+		} catch (Exception e) {
 			Utils.raise(e);
 		}
 	}
@@ -108,6 +114,8 @@ public class MyMessageProducer implements MessageProducer{
 			arg1.setJMSExpiration(timeToLive);
 			arg1.setJMSDeliveryMode(deliveryMode);
 			this.sessionSend.send(arg1);
+		} catch(NullPointerException exp){
+			throw new JMSException("This producer is closed");
 		} catch (IOException e) {
 			Utils.raise(e);
 		}
