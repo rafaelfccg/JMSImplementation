@@ -42,12 +42,15 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	private ArrayList<Session> sessions;
 	ReentrantLock lock = new ReentrantLock();
 	
+	private static int  id = 0;
+	
 	public  MyConnection(String hostIp, int hostPort){
 		this.hostPort = hostPort;
 		this.hostIp = hostIp;
 		this.subscribed = new HashMap<String,ArrayList<SessionMessageReceiverListener>>();
 		this.sessions = new ArrayList<Session>();
-		this.clientId = "CLT:"+UUID.randomUUID().toString();
+		this.clientId = "CLT:"+UUID.randomUUID().toString()+id;
+		id++;
 	}
 	private void isOpen() throws JMSException{
 		if(!this.open){
@@ -199,6 +202,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		isOpen();
 		setModified();
 		MyMessage msg = (MyMessage) myMessage;
+		msg.setReadOnly(true);
 		Query query = new MessageQuery(getClientID(),msg);
 		senderConnection.sendMessageAsync(query);
 	}

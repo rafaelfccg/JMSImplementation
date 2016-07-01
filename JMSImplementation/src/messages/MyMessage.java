@@ -37,6 +37,14 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	
 	MessageAckSession sessionAck;
 	
+	private static int messageId = 0;
+	
+	protected boolean readOnly = false;
+	
+	public void setReadOnly(boolean b){
+		this.readOnly = b;
+	}
+	
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeObject(destination);
@@ -64,7 +72,8 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	}
 	
 	public MyMessage(){
-		this.jmsMessageId = "MSG:"+UUID.randomUUID().toString();
+		this.jmsMessageId = "MSG:"+UUID.randomUUID().toString()+ messageId;
+		messageId++;
 	}
 	
 	@Override
@@ -231,105 +240,129 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	public boolean propertyExists(String arg0) throws JMSException {
 		return this.properties.containsKey(arg0);
 	}
-
+	protected void isSettable() throws JMSException{
+		if(this.readOnly){
+			throw new JMSException("This message is Read-Only");
+		}
+	}
 	@Override
 	public void setBooleanProperty(String arg0, boolean arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, new Boolean(arg1));
 	}
 
 	@Override
 	public void setByteProperty(String arg0, byte arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, new Byte(arg1));
 		
 	}
 
 	@Override
 	public void setDoubleProperty(String arg0, double arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, new Double(arg1));
 	}
 
 	@Override
 	public void setFloatProperty(String arg0, float arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, new Float(arg1));
 	}
 
 	@Override
 	public void setIntProperty(String arg0, int arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, new Integer(arg1));
 	}
 
 	@Override
 	public void setJMSCorrelationID(String arg0) throws JMSException {
+		isSettable();
 		this.jmsCorrelationId = arg0;
 	}
 
 	@Override
 	public void setJMSCorrelationIDAsBytes(byte[] arg0) throws JMSException {
+		isSettable();
 		this.jmsCorrelationId = new String(arg0);
 	}
 
 	@Override
 	public void setJMSDeliveryMode(int arg0) throws JMSException {
+		isSettable();
 		this.jmsDeliveryMode = new Integer(arg0);
 	}
 
 	@Override
 	public void setJMSDestination(Destination arg0) throws JMSException {
+		isSettable();
 		this.destination = arg0;
 	}
 
 	@Override
 	public void setJMSExpiration(long arg0) throws JMSException {
+		isSettable();
 		this.timeToLive = new Long(arg0);
 	}
 
 	@Override
 	public void setJMSMessageID(String arg0) throws JMSException {
+		isSettable();
 		this.jmsMessageId = arg0;
 	}
 
 	@Override
 	public void setJMSPriority(int arg0) throws JMSException {
+		isSettable();
 		this.priority = new Integer(arg0);
 	}
 
 	@Override
 	public void setJMSRedelivered(boolean arg0) throws JMSException {
+		isSettable();
 		this.redelivered = new Boolean(arg0);
 	}
 
 	@Override
 	public void setJMSReplyTo(Destination arg0) throws JMSException {
+		isSettable();
 		this.replyTo = arg0;
 	}
 
 	@Override
 	public void setJMSTimestamp(long arg0) throws JMSException {
+		isSettable();
 		this.timestamp = new Long(arg0);
 	}
 
 	@Override
 	public void setJMSType(String arg0) throws JMSException {
+		isSettable();
 		this.jmsType = arg0;
 	}
 
 	@Override
 	public void setLongProperty(String arg0, long arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, new Long(arg1));
 	}
 
 	@Override
 	public void setObjectProperty(String arg0, Object arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, arg1);
 	}
 
 	@Override
 	public void setShortProperty(String arg0, short arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, new Short(arg1));
 	}
 
 	@Override
 	public void setStringProperty(String arg0, String arg1) throws JMSException {
+		isSettable();
 		this.properties.put(arg0, arg1);
 	}
 
