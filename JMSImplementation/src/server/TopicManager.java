@@ -2,6 +2,9 @@ package server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class TopicManager {
 
@@ -13,10 +16,13 @@ public class TopicManager {
 		
 		private HashMap<String, Node> children;
 		
+		private ConcurrentLinkedQueue<Object> messages;
+		
 		public Node(String name){
 			this.name = name;
 			this.subscribed = new ArrayList<String>();
 			this.children = new HashMap<String, Node>();
+			this.messages = new ConcurrentLinkedQueue<Object>();
 		}
 
 		public ArrayList<String> getSubscribed() {
@@ -42,13 +48,24 @@ public class TopicManager {
 		public void setName(String name) {
 			this.name = name;
 		}
+
+		public ConcurrentLinkedQueue<Object> getMessages() {
+			return messages;
+		}
+
+		public void setMessages(ConcurrentLinkedQueue<Object> messages) {
+			this.messages = messages;
+		}
 		
 	}
 	
 	private Node root;
 	
+	private LinkedBlockingQueue<String> lastUpdatedTopics;
+	
 	public TopicManager(){
 		this.root = new Node("/");
+		this.lastUpdatedTopics = new LinkedBlockingQueue<String>();
 	}
 	
 	private String[] getComponents(String path){
@@ -67,6 +84,18 @@ public class TopicManager {
 		}	
 		
 		return curr;
+	}
+	
+	public Object getMessageToSend(String path){
+		return this.getNode(path).getMessages().poll();
+	}
+	
+	public void addMessageToTopic(String path, Object message){
+		Node node = this.getNode(path);
+		if(node != null){// if topic doesn't exists, then discard the message
+			this.lastUpdatedTopics.add(path);
+			node.getMessages().add(message);
+		}
 	}
 	
 	public ArrayList<String> getSubscribed(String path){
@@ -142,6 +171,14 @@ public class TopicManager {
 			str += dumpAux(child, level + 1);
 		}
 		return str;
+	}
+
+	public LinkedBlockingQueue<String> getLastUpdatedTopics() {
+		return lastUpdatedTopics;
+	}
+
+	public void setLastUpdatedTopics(LinkedBlockingQueue<String> lastUpdatedTopics) {
+		this.lastUpdatedTopics = lastUpdatedTopics;
 	}
 	
 }
