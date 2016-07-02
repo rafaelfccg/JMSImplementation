@@ -293,4 +293,11 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 		
 	}
 
+	@Override
+	public void received(Message message) throws JMSException {
+		if(this.acknowledgeMode == Session.AUTO_ACKNOWLEDGE){
+			message.acknowledge();
+		}
+	}
+
 }

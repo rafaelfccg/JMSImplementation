@@ -27,7 +27,6 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 	protected boolean noLocal;
 	private SessionConsumerOperations owner;
 	
-	
 	public MyMessageConsumer(Destination destination, String selector, boolean noLocal,SessionConsumerOperations owner){
 		this.owner = owner;
 		this.destination = destination;
@@ -84,7 +83,9 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 				if(this.messageQueue.isEmpty()){
 					return lastMessage;
 				}else {
-					return this.messageQueue.remove();
+					msg = this.messageQueue.remove();
+					this.owner.received(msg);
+					return msg;
 				}
 			}
 		} catch (InterruptedException e) {
@@ -109,7 +110,9 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 				if(this.messageQueue.isEmpty()){
 					return lastMessage;
 				}else {
-					return this.messageQueue.remove();
+					msg = this.messageQueue.remove();
+					this.owner.received(msg);
+					return msg;
 				}
 			}
 			
@@ -134,6 +137,7 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 				return msg;
 			}else{
 				msg = this.messageQueue.remove();
+				this.owner.received(msg);
 			}
 			this.lock.unlock();
 		}
@@ -155,15 +159,17 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
         	this.lastMessage = message;
             if (messageListener != null) {
             	messageListener.onMessage(message);
+            	this.owner.received(this.lastMessage);
             	this.messageQueue.remove();
-            } else {
-                System.err.println("MessageListener no longer registered");
-            }
+            } 
             
         } catch (Throwable exception) {
         	exception.printStackTrace();
         }finally{
-        	if(lock.isLocked()) this.lock.unlock();
+        	if(lock.isLocked()){
+        		this.lock.notify();
+        		this.lock.unlock();
+        	}
         }
 	}
 
