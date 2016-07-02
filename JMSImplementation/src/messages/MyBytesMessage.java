@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class MyBytesMessage extends MyMessage implements BytesMessage{
@@ -379,7 +380,7 @@ public class MyBytesMessage extends MyMessage implements BytesMessage{
             throw new NullPointerException(
                 "BytesMessage does not support null");
         } else if (value instanceof Serializable){       
-        	/*try {
+        	try {
         		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				ObjectOutputStream oos = new ObjectOutputStream(bos);
 				oos.writeObject(value);
@@ -390,7 +391,7 @@ public class MyBytesMessage extends MyMessage implements BytesMessage{
 				raise(e);
 			}
         	
-        } else {*/
+        } else {
         	   throw new JMSException("Cannot write objects of type=" +
             value.getClass().getName());
         }
