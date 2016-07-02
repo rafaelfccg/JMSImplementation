@@ -27,8 +27,10 @@ import javax.jms.TopicSubscriber;
 import connection.MyConnectionSendMessage;
 import messages.MessageAckSession;
 import messages.MyBytesMessage;
+import messages.MyMessage;
 import messages.MyMessageConsumer;
 import messages.MyMessageProducer;
+import topic.MyTopic;
 import utils.Utils;
 
 public class MySession implements Session, SessionMessageReceiverListener, SessionConsumerOperations, MessageAckSession,MySessionMessageSend{
@@ -120,23 +122,20 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 			this.subscribedList.put(topic.getTopicName(), list);
 			return msgConsumer;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new JMSException(e.getMessage());
+			Utils.raise(e);
 		}
+		return null;
 	}
 
 	@Override
 	public TopicSubscriber createDurableSubscriber(Topic arg0, String arg1) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
 	public TopicSubscriber createDurableSubscriber(Topic arg0, String arg1, String arg2, boolean arg3)
 			throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
@@ -147,8 +146,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public Message createMessage() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		return new MyMessage();
 	}
 
 	@Override
@@ -202,8 +200,13 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public Topic createTopic(String arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		Topic topic = new MyTopic(arg0);
+		try {
+			connection.createTopic(topic);
+		} catch (IOException e) {
+			Utils.raise(e);
+		}
+		return topic;
 	}
 
 	@Override

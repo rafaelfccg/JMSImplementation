@@ -18,8 +18,10 @@ import javax.jms.Session;
 import javax.jms.Topic;
 
 import messages.MyMessage;
+import server.query.CreateTopicQuery;
 import server.query.MessageQuery;
 import server.query.Query;
+import server.query.QueryType;
 import server.query.SubscriberQuery;
 import session.MySession;
 import session.SessionMessageReceiverListener;
@@ -273,7 +275,14 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	}
 	@Override
 	public void closeSession(Session session) {
-		// TODO Auto-generated method stub
-		
+		for(String key:this.subscribed.keySet()){
+			this.subscribed.get(key).remove(session);
+		}
+	}
+	@Override
+	public void createTopic(Topic my) throws IOException, JMSException {
+		CreateTopicQuery query = new CreateTopicQuery(getClientID(), QueryType.CREATE_TOPIC);
+		query.setTopic(my);
+		this.senderConnection.sendMessageAsync(query);
 	}
 }
