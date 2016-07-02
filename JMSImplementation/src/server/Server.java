@@ -44,6 +44,9 @@ public class Server {
 	 */
 	private HashMap<String, ConnectionHandler> receivers;
 	
+	/**
+	 * Topic Manager instance
+	 */
 	private TopicManager topicManager;
 	
 	public Server(int port) throws IOException{
@@ -52,6 +55,10 @@ public class Server {
 		this.senders = new HashMap<String, ConnectionHandler>();
 		this.receivers = new HashMap<String, ConnectionHandler>();
 		this.topicManager = new TopicManager();
+		
+		MessageForwarder dispatcher = new MessageForwarder(this.topicManager, this);
+		Thread t = new Thread(dispatcher);
+		t.start();
 	}
 	
 	public void init() throws IOException{
@@ -116,12 +123,8 @@ public class Server {
 		logger.log(Level.INFO, "Message received from {0} (topic: {1})", 
 				new Object[]{ query.getClientId(), topic.getTopicName() });
 		
-		ArrayList<String> subscribed = this.topicManager.getSubscribed(topic.getTopicName());
+		this.topicManager.addMessageToTopic(topic.getTopicName(), query);
 		
-		logger.log(Level.INFO, "Distributing message to {0} consumers", subscribed.size());
-		for(String clientId : subscribed){
-			this.receivers.get(clientId).getToSend().put(query);
-		}
 	}
 	
 	public ServerSocket getServerSocket() {
