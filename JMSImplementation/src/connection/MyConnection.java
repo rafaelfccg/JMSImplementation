@@ -18,6 +18,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 
 import messages.MyMessage;
+import server.query.AckQuery;
 import server.query.CreateTopicQuery;
 import server.query.MessageQuery;
 import server.query.Query;
@@ -269,14 +270,15 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	public void acknowledgeMessage(Message message, Session session) throws IOException, JMSException {
 		isOpen();
 		setModified();
-		//AckQuery
-		//AbstractQuery query = new SubscriberQuery(getClientID(),topic.getTopicName());
-		//publisherConnection.send(query);
+		Query query = new AckQuery(getClientID(),message.getJMSMessageID());
+		senderConnection.sendMessageAsync(query);
 	}
 	@Override
 	public void closeSession(Session session) {
 		for(String key:this.subscribed.keySet()){
-			this.subscribed.get(key).remove(session);
+			if(this.subscribed.get(key).contains(session)){
+				this.subscribed.get(key).remove(session);
+			}
 		}
 	}
 	@Override
