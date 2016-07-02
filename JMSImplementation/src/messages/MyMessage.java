@@ -91,7 +91,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public void clearBody() throws JMSException {
-		throw new JMSException("This method must be overwriten by its super classes");
+		//no body to clean
 	}
 
 	@Override

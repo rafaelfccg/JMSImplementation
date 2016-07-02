@@ -30,6 +30,7 @@ import messages.MyBytesMessage;
 import messages.MyMessage;
 import messages.MyMessageConsumer;
 import messages.MyMessageProducer;
+import messages.MyObjectMessage;
 import topic.MyTopic;
 import topic.MyTopicSubscriber;
 import utils.Utils;
@@ -151,7 +152,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public ObjectMessage createObjectMessage() throws JMSException {
-		throw new JMSException("Not Implemented method");
+		return new MyObjectMessage();
 	}
 
 	@Override
