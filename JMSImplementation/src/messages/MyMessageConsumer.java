@@ -24,8 +24,8 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 	private ReentrantLock lock;
 	private AtomicInteger operationsInProgress;
 	private boolean closed;
-	boolean noLocal;
-	SessionConsumerOperations owner;
+	protected boolean noLocal;
+	private SessionConsumerOperations owner;
 	
 	
 	public MyMessageConsumer(Destination destination, String selector, boolean noLocal,SessionConsumerOperations owner){

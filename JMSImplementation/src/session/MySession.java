@@ -31,12 +31,11 @@ import messages.MyMessage;
 import messages.MyMessageConsumer;
 import messages.MyMessageProducer;
 import topic.MyTopic;
+import topic.MyTopicSubscriber;
 import utils.Utils;
 
 public class MySession implements Session, SessionMessageReceiverListener, SessionConsumerOperations, MessageAckSession,MySessionMessageSend{
 
-	public final static int AUTO_ACKNOWLEDGE = 1;
-	public final static int CLIENT_ACKNOWLEDGE  = 2;
 	MyConnectionSendMessage connection;
 	boolean transacted;
 	int acknowledgeMode;
@@ -133,15 +132,16 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	}
 
 	@Override
-	public TopicSubscriber createDurableSubscriber(Topic arg0, String arg1, String arg2, boolean arg3)
+	public TopicSubscriber createDurableSubscriber(Topic topic, String name, String messageSelector, boolean noLocal)
 			throws JMSException {
-		throw new JMSException("Not Implemented method");
+		MyTopicSubscriber tsubs = new MyTopicSubscriber(topic, name, messageSelector, noLocal, this);
+		
+		return tsubs;
 	}
 
 	@Override
 	public MapMessage createMapMessage() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
@@ -151,14 +151,12 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public ObjectMessage createObjectMessage() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
 	public ObjectMessage createObjectMessage(Serializable arg0) throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
@@ -264,6 +262,9 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 			
 			for(MessageListener consumer : consumers ){
 				consumer.onMessage(message);
+			}
+			if(this.acknowledgeMode == Session.AUTO_ACKNOWLEDGE){
+				message.acknowledge();
 			}
 		} catch (JMSException e) {
 			e.printStackTrace();

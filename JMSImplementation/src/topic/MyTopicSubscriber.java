@@ -12,23 +12,28 @@ import messages.MyMessageConsumer;
 import session.SessionConsumerOperations;
 
 public class MyTopicSubscriber extends MyMessageConsumer implements TopicSubscriber{
-
+	
+	String name;
+	
 	public MyTopicSubscriber(Destination destination, String selector, boolean noLocal,
 			SessionConsumerOperations owner) {
 		super(destination, selector, noLocal, owner);
-		// TODO Auto-generated constructor stub
+	}
+	
+	public MyTopicSubscriber(Destination destination,String name, String selector,   boolean noLocal,
+			SessionConsumerOperations owner) {
+		super(destination, selector, noLocal, owner);
+		this.name= name;
 	}
 
 	@Override
 	public boolean getNoLocal() throws JMSException {
-		// TODO Auto-generated method stub
-		return false;
+		return noLocal;
 	}
 
 	@Override
 	public Topic getTopic() throws JMSException {
-		// TODO Auto-generated method stub
-		return null;
+		return (Topic)this.getDestination();
 	}
 
 }

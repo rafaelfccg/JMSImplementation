@@ -11,6 +11,7 @@ import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.JMSProducer;
+import javax.jms.JMSRuntimeException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
@@ -46,43 +47,70 @@ public class MyJMSContext implements JMSContext{
 
 	@Override
 	public void commit() {
-		// TODO Auto-generated method stub
-		
+		try {
+			this.session.commit();
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public QueueBrowser createBrowser(Queue arg0) {
-		// TODO Auto-generated method stub
+		try {
+			return this.session.createBrowser(arg0);
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public QueueBrowser createBrowser(Queue arg0, String arg1) {
-		// TODO Auto-generated method stub
+		try {
+			return this.session.createBrowser(arg0,arg1);
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public BytesMessage createBytesMessage() {
-		// TODO Auto-generated method stub
+		try {
+			return this.session.createBytesMessage();
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public JMSConsumer createConsumer(Destination arg0) {
-		// TODO Auto-generated method stub
+		try {
+			return new MyJMSConsumer(this.session.createConsumer(arg0));
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public JMSConsumer createConsumer(Destination arg0, String arg1) {
-		// TODO Auto-generated method stub
+		try {
+			return new MyJMSConsumer(this.session.createConsumer(arg0,arg1));
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public JMSConsumer createConsumer(Destination arg0, String arg1, boolean arg2) {
-		// TODO Auto-generated method stub
+		try {
+			return new MyJMSConsumer(this.session.createConsumer(arg0,arg1,arg2));
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -94,38 +122,52 @@ public class MyJMSContext implements JMSContext{
 
 	@Override
 	public JMSConsumer createDurableConsumer(Topic arg0, String arg1) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return new MyJMSConsumer(this.session.createDurableSubscriber(arg0,arg1));
+		} catch (JMSException e) {
+			throw new JMSRuntimeException(e.getMessage());
+		}
 	}
 
 	@Override
 	public JMSConsumer createDurableConsumer(Topic arg0, String arg1, String arg2, boolean arg3) {
-		// TODO Auto-generated method stub
-		return null;
+			throw new JMSRuntimeException("Method not Implemented");
 	}
 
 	@Override
 	public MapMessage createMapMessage() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return this.session.createMapMessage();
+		} catch (JMSException e) {
+			throw new JMSRuntimeException(e.getMessage());
+		}
 	}
 
 	@Override
 	public Message createMessage() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return this.session.createMessage();
+		} catch (JMSException e) {
+			throw new JMSRuntimeException(e.getMessage());
+		}
 	}
 
 	@Override
 	public ObjectMessage createObjectMessage() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return this.session.createObjectMessage();
+		} catch (JMSException e) {
+			throw new JMSRuntimeException(e.getMessage());
+		}
 	}
 
 	@Override
 	public ObjectMessage createObjectMessage(Serializable arg0) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return this.session.createObjectMessage(arg0);
+		} catch (JMSException e) {
+			throw new JMSRuntimeException(e.getMessage());
+		}
 	}
 
 	@Override
@@ -202,8 +244,7 @@ public class MyJMSContext implements JMSContext{
 
 	@Override
 	public boolean getAutoStart() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.getAutoStart();
 	}
 
 	@Override
@@ -256,8 +297,7 @@ public class MyJMSContext implements JMSContext{
 
 	@Override
 	public void setAutoStart(boolean arg0) {
-		// TODO Auto-generated method stub
-		
+		this.autoStart = arg0;
 	}
 
 	@Override
