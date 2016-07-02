@@ -3,6 +3,8 @@ package server;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import server.query.MessageQuery;
+
 public class MessageForwarder implements Runnable {
 	
 	private TopicManager topicManager;
@@ -23,9 +25,14 @@ public class MessageForwarder implements Runnable {
 				
 				String topic = this.topicManager.getLastUpdatedTopics().take();
 				
-				Object message = this.topicManager.getMessageToSend(topic);
+				MessageQuery message = (MessageQuery) this.topicManager.getMessageToSend(topic);
 				
 				if(message == null) continue;
+				
+				if(!message.getMessage().isAlive()){
+					System.out.println("MESSAGE TOO OLD");
+					continue;
+				}
 				
 				ArrayList<String> subscribed = this.topicManager.getSubscribed(topic);
 				

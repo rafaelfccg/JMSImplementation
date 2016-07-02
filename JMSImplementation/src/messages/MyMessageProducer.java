@@ -23,6 +23,7 @@ public class MyMessageProducer implements MessageProducer{
 	public MyMessageProducer(Destination destination, MySessionMessageSend session){
 		this.destination = destination;
 		this.sessionSend = session;
+		this.timeToLive = Long.MAX_VALUE;
 	}
 	
 	@Override

@@ -73,7 +73,12 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	
 	public MyMessage(){
 		this.jmsMessageId = "MSG:"+UUID.randomUUID().toString()+ messageId;
+		this.timestamp = System.currentTimeMillis();
 		messageId++;
+	}
+	
+	public boolean isAlive(){
+		return (System.currentTimeMillis() - this.timestamp) <= this.timeToLive;
 	}
 	
 	@Override
