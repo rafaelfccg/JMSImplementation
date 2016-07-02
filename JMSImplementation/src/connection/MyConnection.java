@@ -23,6 +23,7 @@ import server.query.MessageQuery;
 import server.query.Query;
 import server.query.QueryType;
 import server.query.SubscriberQuery;
+import server.query.UnsubscriberQuery;
 import session.MySession;
 import session.SessionMessageReceiverListener;
 import topic.MyTopic;
@@ -258,10 +259,9 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		setModified();
 		Topic topic = new MyTopic(destination);
 		boolean unsubcribe = unsubscribeSessionToDestination(topic, session);
-		//UnsubscriberQuery
 		if(unsubcribe){
-		//AbstractQuery query = new SubscriberQuery(getClientID(),topic.getTopicName());
-		//publisherConnection.send(query);
+			Query query = new UnsubscriberQuery(getClientID(),topic.getTopicName());
+			senderConnection.send(query);
 		}
 		
 	}
@@ -281,7 +281,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	}
 	@Override
 	public void createTopic(Topic my) throws IOException, JMSException {
-		CreateTopicQuery query = new CreateTopicQuery(getClientID(), QueryType.CREATE_TOPIC);
+		CreateTopicQuery query = new CreateTopicQuery(getClientID());
 		query.setTopic(my);
 		this.senderConnection.sendMessageAsync(query);
 	}

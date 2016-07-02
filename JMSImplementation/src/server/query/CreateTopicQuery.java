@@ -8,9 +8,8 @@ public class CreateTopicQuery extends Query{
 	
 	private Topic topic;
 	
-	public CreateTopicQuery(String clientId, QueryType type) {
-		super(clientId, type);
-		// TODO Auto-generated constructor stub
+	public CreateTopicQuery(String clientId) {
+		super(clientId, QueryType.CREATE_TOPIC);
 	}
 	public Topic getTopic() {
 		return topic;
