@@ -1,13 +1,3 @@
-import java.rmi.registry.LocateRegistry;
-import java.util.Hashtable;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NameClassPair;
-import javax.naming.NamingEnumeration;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
-
 import server.Server;
 
 /**
@@ -24,8 +14,6 @@ import server.Server;
 public class ServerLauncher {
 	
 	public static void main(String[] args) throws Exception{
-		
-		LocateRegistry.createRegistry(1099);
 		
 		Server server = new Server(12345);
 		server.init();
