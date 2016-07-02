@@ -325,7 +325,6 @@ public class MyMessage implements Message, Serializable, Externalizable {
 
 	@Override
 	public void setJMSRedelivered(boolean arg0) throws JMSException {
-		isSettable();
 		this.redelivered = new Boolean(arg0);
 	}
 
