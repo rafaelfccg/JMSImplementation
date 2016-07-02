@@ -113,9 +113,6 @@ public class ConnectionHandler implements Runnable{
 			case CREATE_TOPIC:
 				this.server.handleCreateTopic((TopicQuery) query);
 				break;
-			case DELETE_TOPIC:
-				this.server.handleDeleteTopic((TopicQuery) query);
-				break;
 			case MESSAGE:
 				this.server.handleMessage((MessageQuery) query);
 				break;

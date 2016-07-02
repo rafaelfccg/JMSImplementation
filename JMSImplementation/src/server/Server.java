@@ -100,10 +100,6 @@ public class Server {
 		this.topicManager.create(query.getName());
 	}
 	
-	public void handleDeleteTopic(TopicQuery query) {
-		this.topicManager.delete(query.getName());
-	}
-
 	public void handleSubscribe(SubscriberQuery query) {
 		logger.log(Level.INFO, "Client {0} subscribed to topic {1}", new Object[]{ query.getClientId(), query.getTopic() });
 		this.topicManager.subscribe(query.getTopic(), query.getClientId());
