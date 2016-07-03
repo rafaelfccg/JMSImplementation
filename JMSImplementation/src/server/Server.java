@@ -13,6 +13,7 @@ import javax.jms.Message;
 import javax.jms.Topic;
 
 import messages.MyBytesMessage;
+import server.query.AckQuery;
 import server.query.MessageQuery;
 import server.query.Query;
 import server.query.SubscriberQuery;
@@ -120,6 +121,10 @@ public class Server {
 				new Object[]{ query.getClientId(), topic.getTopicName() });
 		
 		this.topicManager.addMessageToTopic(topic.getTopicName(), query);
+		
+		// Send ACK
+		AckQuery ack = new AckQuery(query.getClientId(), query.getMessage().getJMSMessageID());
+		this.getReceivers().get(query.getClientId()).getToSend().add(ack);
 		
 	}
 	

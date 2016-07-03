@@ -2,6 +2,7 @@ package server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -19,10 +20,13 @@ public class TopicManager {
 		
 		private HashMap<String, Node> children;
 		
+		private Node parent;
+		
 		private PriorityBlockingQueue<MessageQuery> messages;
 		
-		public Node(String name){
+		public Node(String name, Node parent){
 			this.name = name;
+			this.parent = parent;
 			this.subscribed = new ArrayList<String>();
 			this.children = new HashMap<String, Node>();
 			this.messages = new PriorityBlockingQueue<MessageQuery>();
@@ -59,6 +63,14 @@ public class TopicManager {
 		public void setMessages(PriorityBlockingQueue<MessageQuery> messages) {
 			this.messages = messages;
 		}
+
+		public Node getParent() {
+			return parent;
+		}
+
+		public void setParent(Node parent) {
+			this.parent = parent;
+		}
 		
 	}
 	
@@ -67,7 +79,7 @@ public class TopicManager {
 	private LinkedBlockingQueue<String> lastUpdatedTopics;
 	
 	public TopicManager(){
-		this.root = new Node("/");
+		this.root = new Node("/", null);
 		this.lastUpdatedTopics = new LinkedBlockingQueue<String>();
 	}
 	
@@ -98,25 +110,20 @@ public class TopicManager {
 	}
 	
 	public void addMessageToTopic(String path, MessageQuery message){
+		if(!this.exists(path)) this.create(path);
 		Node node = this.getNode(path);
-		if(node != null){// if topic doesn't exists, then discard the message
-			this.lastUpdatedTopics.add(path);
-			node.getMessages().add(message);
-		}
+		this.lastUpdatedTopics.add(path);
+		node.getMessages().add(message);
 	}
 	
 	public ArrayList<String> getSubscribed(String path){
 		ArrayList<String> subscribed = new ArrayList<String>();
 		
-		String[] components = this.getComponents(path);
+		Node curr = this.getNode(path);
 		
-		Node curr = root;
-		subscribed.addAll(curr.getSubscribed());
-		
-		for(String component : components){
-			curr = curr.getChildren().get(component);
-			if(curr == null) break;
+		while(curr != null){
 			subscribed.addAll(curr.getSubscribed());
+			curr = curr.getParent();
 		}
 		
 		return subscribed;
@@ -140,7 +147,7 @@ public class TopicManager {
 		Node curr = root;
 		
 		for(String component : components){
-			if(!curr.getChildren().containsKey(component)) curr.getChildren().put(component, new Node(component));
+			if(!curr.getChildren().containsKey(component)) curr.getChildren().put(component, new Node(component, curr));
 			curr = curr.getChildren().get(component);
 		}	
 	}
