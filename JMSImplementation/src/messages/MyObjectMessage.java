@@ -8,6 +8,8 @@ public class MyObjectMessage extends MyMessage implements ObjectMessage{
 	
 	Serializable object;
 	
+	public MyObjectMessage(){}
+
 	@Override
 	public void clearBody() throws JMSException {
 		this.object = null;

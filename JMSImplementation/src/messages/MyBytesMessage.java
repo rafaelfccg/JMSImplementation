@@ -28,6 +28,8 @@ public class MyBytesMessage extends MyMessage implements BytesMessage{
 	private ByteArrayInputStream byteIn = null;
 
 	private int offSet;
+	
+	public MyBytesMessage() {}
 
 	private DataInputStream getInputStream() throws IOException {
 		if(this.in == null){

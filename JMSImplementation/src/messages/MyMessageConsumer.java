@@ -2,7 +2,9 @@ package messages;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jms.Destination;
@@ -22,6 +24,7 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 	private Message lastMessage;
 	private String selector;
 	private ReentrantLock lock;
+	private Condition waitMessage;
 	private AtomicInteger operationsInProgress;
 	private boolean closed;
 	protected boolean noLocal;
@@ -35,6 +38,7 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 		this.selector = selector;
 		this.noLocal = noLocal;
 		this.lock = new ReentrantLock();
+		waitMessage = lock.newCondition();
 	}
 	@Override
 	public void close() throws JMSException {
@@ -79,7 +83,7 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 		Message msg = null;
 		try {
 			if(this.messageQueue.isEmpty()){
-				lock.wait();
+				this.waitMessage.await();
 				if(this.messageQueue.isEmpty()){
 					return lastMessage;
 				}else {
@@ -105,7 +109,7 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 		Message msg = null;
 		try {
 			if(this.messageQueue.isEmpty()){
-				lock.wait(arg0);
+				this.waitMessage.await(arg0, TimeUnit.MILLISECONDS);
 				//double verification
 				if(this.messageQueue.isEmpty()){
 					return lastMessage;
@@ -167,7 +171,9 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
         	exception.printStackTrace();
         }finally{
         	if(lock.isLocked()){
-        		this.lock.notify();
+        		if(this.lock.hasWaiters(this.waitMessage)){
+        			this.waitMessage.signal();
+        		}
         		this.lock.unlock();
         	}
         }

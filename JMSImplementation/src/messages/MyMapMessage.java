@@ -8,7 +8,6 @@ import javax.jms.MapMessage;
 
 public class MyMapMessage extends MyMessage implements MapMessage{
 
-	
 	HashMap<String,Object> mapBody;
 	
 	@Override

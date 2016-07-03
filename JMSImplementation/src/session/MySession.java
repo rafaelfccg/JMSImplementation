@@ -94,6 +94,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	@Override
 	public BytesMessage createBytesMessage() throws JMSException {
 		BytesMessage bmsg = new MyBytesMessage();
+
 		return bmsg;
 	}
 
@@ -257,15 +258,14 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	@Override
 	public void onMessageReceived(Message message) {
 		Topic destination;
+		MyMessage msg = (MyMessage)message;
+		msg.setSessionAck(this);
 		try {
-			destination = (Topic)message.getJMSDestination();
+			destination = (Topic)msg.getJMSDestination();
 			ArrayList<MessageListener> consumers = this.subscribedList.get(destination.getTopicName());
 			
 			for(MessageListener consumer : consumers ){
-				consumer.onMessage(message);
-			}
-			if(this.acknowledgeMode == Session.AUTO_ACKNOWLEDGE){
-				message.acknowledge();
+				consumer.onMessage(msg);
 			}
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -291,7 +291,6 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 		Topic topic = (Topic)consumer.getDestination();
 		ArrayList<MessageListener> arr = this.subscribedList.get(topic.getTopicName());
 		arr.remove(consumer);
-		
 	}
 
 	@Override

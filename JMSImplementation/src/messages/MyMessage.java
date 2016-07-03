@@ -35,11 +35,21 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	private Integer priority;
 	private Boolean redelivered;
 	
-	MessageAckSession sessionAck;
+	private MessageAckSession sessionAck;
 	
 	private static int messageId = 0;
 	
 	protected boolean readOnly = false;
+	
+	public void setSessionAck(MessageAckSession ack){
+		this.sessionAck = ack;
+	}
+	
+	public MyMessage(){
+		this.jmsMessageId = "MSG:"+UUID.randomUUID().toString()+ messageId;
+		this.timestamp = System.currentTimeMillis();
+		messageId++;
+	}
 	
 	public void setReadOnly(boolean b){
 		this.readOnly = b;
@@ -71,20 +81,15 @@ public class MyMessage implements Message, Serializable, Externalizable {
 		this.timeToLive =  (Long)in.readObject();
 	}
 	
-	public MyMessage(){
-		this.jmsMessageId = "MSG:"+UUID.randomUUID().toString()+ messageId;
-		this.timestamp = System.currentTimeMillis();
-		messageId++;
-	}
-	
 	public boolean isAlive(){
 		return (System.currentTimeMillis() - this.timestamp) <= this.timeToLive;
 	}
 	
 	@Override
 	public void acknowledge() throws JMSException {
-		if(sessionAck!=null){
+		if(sessionAck != null){
 			sessionAck.ack(this);
+			return;
 		}
 		throw new JMSException("Cannot acknowledge message, unknown session");
 	}
