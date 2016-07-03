@@ -3,6 +3,8 @@ package server;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.jms.JMSException;
+
 import server.query.MessageQuery;
 
 public class MessageForwarder implements Runnable {
@@ -30,7 +32,6 @@ public class MessageForwarder implements Runnable {
 				if(message == null) continue;
 				
 				if(!message.getMessage().isAlive()){
-					System.out.println("MESSAGE TOO OLD");
 					continue;
 				}
 				

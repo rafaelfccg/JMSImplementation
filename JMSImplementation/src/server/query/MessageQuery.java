@@ -1,8 +1,10 @@
 package server.query;
 
+import javax.jms.JMSException;
+
 import messages.MyMessage;
 
-public class MessageQuery extends Query{
+public class MessageQuery extends Query implements Comparable<MessageQuery>{
 
 	/**
 	 * 
@@ -21,6 +23,19 @@ public class MessageQuery extends Query{
 
 	public void setMessage(MyMessage message) {
 		this.message = message;
+	}
+
+	@Override
+	public int compareTo(MessageQuery other) {
+		MyMessage a = this.message;
+		MyMessage b = other.getMessage();
+		
+		try {
+			return (int) ((double)a.getJMSTimestamp()/(a.getJMSPriority() + 1) - (double)b.getJMSTimestamp()/(b.getJMSPriority() + 1));
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 	
 }

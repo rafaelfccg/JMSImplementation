@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
+
+import server.query.MessageQuery;
 
 public class TopicManager {
 
@@ -16,13 +19,13 @@ public class TopicManager {
 		
 		private HashMap<String, Node> children;
 		
-		private ConcurrentLinkedQueue<Object> messages;
+		private PriorityBlockingQueue<MessageQuery> messages;
 		
 		public Node(String name){
 			this.name = name;
 			this.subscribed = new ArrayList<String>();
 			this.children = new HashMap<String, Node>();
-			this.messages = new ConcurrentLinkedQueue<Object>();
+			this.messages = new PriorityBlockingQueue<MessageQuery>();
 		}
 
 		public ArrayList<String> getSubscribed() {
@@ -49,11 +52,11 @@ public class TopicManager {
 			this.name = name;
 		}
 
-		public ConcurrentLinkedQueue<Object> getMessages() {
+		public PriorityBlockingQueue<MessageQuery> getMessages() {
 			return messages;
 		}
 
-		public void setMessages(ConcurrentLinkedQueue<Object> messages) {
+		public void setMessages(PriorityBlockingQueue<MessageQuery> messages) {
 			this.messages = messages;
 		}
 		
@@ -90,7 +93,11 @@ public class TopicManager {
 		return this.getNode(path).getMessages().poll();
 	}
 	
-	public void addMessageToTopic(String path, Object message){
+	public Object getAllMessages(String path){
+		return this.getNode(path).getMessages();
+	}
+	
+	public void addMessageToTopic(String path, MessageQuery message){
 		Node node = this.getNode(path);
 		if(node != null){// if topic doesn't exists, then discard the message
 			this.lastUpdatedTopics.add(path);
