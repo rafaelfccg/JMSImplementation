@@ -65,15 +65,15 @@ public class ClientRequestHandler {
 	 
 	public void send(Object object) throws IOException{
 		this.output.writeObject(object);
-		try {
-			Query ack = (Query) this.input.readObject();
-			if(ack.getType() == QueryType.ACK){
-				
-			}
-		} catch (ClassNotFoundException e) {
-			IOException ioe =new IOException(e.getMessage());
-			throw  ioe;
-		}
+//		try {
+//			Query ack = (Query) this.input.readObject();
+//			if(ack.getType() == QueryType.ACK){
+//				
+//			}
+//		} catch (ClassNotFoundException e) {
+//			IOException ioe =new IOException(e.getMessage());
+//			throw  ioe;
+//		}
 	}
 	public void sendMessageAsync(Query query){
 		MyMessageSender sender = new MyMessageSender();
