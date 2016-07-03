@@ -24,6 +24,7 @@ public class MyMessageProducer implements MessageProducer{
 		this.destination = destination;
 		this.sessionSend = session;
 		this.timeToLive = Long.MAX_VALUE;
+		this.priority = 4;
 	}
 	
 	@Override

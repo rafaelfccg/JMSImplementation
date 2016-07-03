@@ -29,10 +29,10 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	private Integer jmsDeliveryMode;
 	private Long timestamp;
 	private Long timeToLive;
+	private Integer priority;
 	
 	HashMap<String,Object> properties;
 	
-	private Integer priority;
 	private Boolean redelivered;
 	
 	MessageAckSession sessionAck;
@@ -55,6 +55,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 		out.writeObject(this.jmsDeliveryMode);
 		out.writeObject(this.timestamp);
 		out.writeObject(this.timeToLive);
+		out.writeObject(this.priority);
 		out.flush();
 		
 	}
@@ -69,6 +70,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 		this.jmsDeliveryMode = (Integer) in.readObject();
 		this.timestamp = (Long)in.readObject();
 		this.timeToLive =  (Long)in.readObject();
+		this.priority = (Integer) in.readObject();
 	}
 	
 	public MyMessage(){
