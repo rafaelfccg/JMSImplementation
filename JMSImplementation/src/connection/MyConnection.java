@@ -70,7 +70,6 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		}
 	}
 	public void onMessageReceived(Query query){
-		System.out.println("Message Received");
 		Topic destination;
 		if(!this.stopped){
 			try {
@@ -81,7 +80,6 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 					ArrayList<SessionMessageReceiverListener> sessions = this.subscribed.get(destination.getTopicName());
 					String[] arr2 = new String[1];
 					this.subscribed.keySet().toArray(arr2);
-					System.out.println(arr2[0]);
 					if(sessions != null){
 						for(SessionMessageReceiverListener session : sessions ){
 							session.onMessageReceived(msg);
@@ -89,11 +87,8 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 					}
 				}else if(query instanceof AckQuery){
 					AckQuery ackQuery = (AckQuery) query;
-					MessageWaitingAck remove = new MessageWaitingAck(ackQuery.getMessageID());
-					System.out.println("Message Acked: "+ackQuery.getMessageID());
-					System.out.println("Before remove"+this.waitingAck.size());
+					MessageWaitingAck remove = new MessageWaitingAck(ackQuery.getMessageID());					
 					this.waitingAck.remove(remove);
-					System.out.println("After remove"+this.waitingAck.size());
 				}
 			} catch (JMSException e) {
 				e.printStackTrace();
@@ -224,7 +219,6 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		isOpen();
 		setModified();
 		this.waitingAck.add(new MessageWaitingAck(myMessage));
-		System.out.println("Message send: "+myMessage.getJMSMessageID());
 			this.lock.lock();
 		if(lock.hasWaiters(this.messageSent)){
 			this.messageSent.signal();
@@ -315,7 +309,6 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 	}
 	@Override
 	public void run() {
-		System.out.println("Entrou no run");
 		while(true){
 			if(this.waitingAck.isEmpty()){
 				lock.lock();

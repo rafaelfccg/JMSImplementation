@@ -8,12 +8,14 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import session.MySession;
+import test.TickTackToe;
 import topic.MyTopic;
 import utils.Utils;
 
@@ -30,14 +32,13 @@ public class MainConsumer {
 			cfactory = (ConnectionFactory)ctx.lookup("ConnectionFactory");
 			connection = cfactory.createConnection();		
 			session= connection.createSession(false, MySession.AUTO_ACKNOWLEDGE);
-			Destination topic = new MyTopic("abc");
+			Destination topic = new MyTopic("TickTackToe");
 			connection.start();
 			MessageConsumer consumer  = session.createConsumer(topic);
 			consumer.setMessageListener(new MessageListener() {
 				
 				@Override
 				public void onMessage(Message arg0) {
-					System.out.println("Message received");
 					if(arg0 instanceof BytesMessage){
 						try {
 							BytesMessage msg = (BytesMessage)arg0;
@@ -45,6 +46,16 @@ public class MainConsumer {
 						} catch (JMSException e) {
 							e.printStackTrace();
 						}
+					}else if(arg0 instanceof ObjectMessage){
+						TickTackToe game;
+						try {
+							game = (TickTackToe) ((ObjectMessage) arg0).getObject();
+							game.printGame();
+						} catch (JMSException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 					}
 					
 				}

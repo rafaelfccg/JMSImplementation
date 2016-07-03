@@ -1,5 +1,8 @@
 package messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
@@ -10,6 +13,19 @@ public class MyObjectMessage extends MyMessage implements ObjectMessage{
 	
 	public MyObjectMessage(){}
 
+	
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		super.writeExternal(out);
+		out.writeObject(object);
+	}
+	
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		super.readExternal(in);
+		this.object =  (Serializable) in.readObject();
+	}
+	
 	@Override
 	public void clearBody() throws JMSException {
 		this.object = null;

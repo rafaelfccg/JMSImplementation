@@ -283,7 +283,6 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public void send(Message message) throws IOException, JMSException {
-		System.out.println("Entrou no session");
 		connection.sendMessage(message);
 	}
 
