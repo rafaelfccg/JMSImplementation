@@ -1,17 +1,21 @@
 package server.misc;
 
+import javax.jms.JMSException;
+
 import server.query.MessageQuery;
 
 public class MessageAckPair {
 
+	private String msgId;
+	
 	private MessageQuery message;
 	
-	private Long timestamp;
+	private Long timeout;
 
 	public MessageAckPair(MessageQuery message, Long timestamp) {
 		super();
 		this.message = message;
-		this.timestamp = timestamp;
+		this.timeout = timestamp;
 	}
 
 	public MessageQuery getMessage() {
@@ -22,12 +26,24 @@ public class MessageAckPair {
 		this.message = message;
 	}
 
-	public Long getTimestamp() {
-		return timestamp;
+	public Long getTimeout() {
+		return timeout;
 	}
 
-	public void setTimestamp(Long timestamp) {
-		this.timestamp = timestamp;
+	public void setTimeout(Long timestamp) {
+		this.timeout = timestamp;
+	}
+	
+	public String getMsgId() {
+		return msgId;
+	}
+
+	public void setMsgId(String msgId) {
+		this.msgId = msgId;
+	}
+
+	public boolean equals(MessageAckPair other){
+		return this.msgId.equals(other.msgId);
 	}
 	
 }
