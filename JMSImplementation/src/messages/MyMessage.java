@@ -30,10 +30,9 @@ public class MyMessage implements Message, Serializable, Externalizable {
 	private Long timestamp;
 	private Long timeToLive;
 	private Integer priority;
+	private Boolean redelivered;
 	
 	HashMap<String,Object> properties;
-	
-	private Boolean redelivered;
 	
 	private MessageAckSession sessionAck;
 	
@@ -49,6 +48,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 		this.jmsMessageId = "MSG:"+UUID.randomUUID().toString()+ messageId;
 		this.timestamp = System.currentTimeMillis();
 		messageId++;
+		this.redelivered = false;
 	}
 	
 	public void setReadOnly(boolean b){
@@ -66,6 +66,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 		out.writeObject(this.timestamp);
 		out.writeObject(this.timeToLive);
 		out.writeObject(this.priority);
+		out.writeObject(this.redelivered);
 		out.flush();
 		
 	}
@@ -81,6 +82,7 @@ public class MyMessage implements Message, Serializable, Externalizable {
 		this.timestamp = (Long)in.readObject();
 		this.timeToLive =  (Long)in.readObject();
 		this.priority = (Integer) in.readObject();
+		this.redelivered = (Boolean) in.readObject();
 	}
 	
 	public boolean isAlive(){
