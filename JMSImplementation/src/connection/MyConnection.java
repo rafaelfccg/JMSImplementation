@@ -70,6 +70,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		}
 	}
 	public void onMessageReceived(Query query){
+		System.out.println("Message Received");
 		Topic destination;
 		if(!this.stopped){
 			try {
@@ -89,7 +90,10 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 				}else if(query instanceof AckQuery){
 					AckQuery ackQuery = (AckQuery) query;
 					MessageWaitingAck remove = new MessageWaitingAck(ackQuery.getMessageID());
+					System.out.println("Message Acked: "+ackQuery.getMessageID());
+					System.out.println("Before remove"+this.waitingAck.size());
 					this.waitingAck.remove(remove);
+					System.out.println("After remove"+this.waitingAck.size());
 				}
 			} catch (JMSException e) {
 				e.printStackTrace();
@@ -220,7 +224,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		isOpen();
 		setModified();
 		this.waitingAck.add(new MessageWaitingAck(myMessage));
-		System.out.println("Will signal");
+		System.out.println("Message send: "+myMessage.getJMSMessageID());
 			this.lock.lock();
 		if(lock.hasWaiters(this.messageSent)){
 			this.messageSent.signal();
@@ -347,13 +351,13 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 			
 		}
 		
-		public MessageWaitingAck(String messageId) throws JMSException{
+		public MessageWaitingAck(String messageId){
 			this.messageId = messageId;
 		}
 		public Message getMessage(){
 			return message;
 		}
-		public String getMessageID() throws JMSException{
+		public String getMessageID(){
 			return messageId;
 		}
 
@@ -364,12 +368,13 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		@Override
 		public boolean equals(Object o){
 			if(o instanceof MessageWaitingAck){
-				try {
-					return ((MessageWaitingAck) o).getMessageID() == getMessageID();
-				} catch (JMSException e) {
-					return false;
-				}
+				System.out.println("compare: "+ getMessageID());
+				System.out.println("with   : "+ ((MessageWaitingAck) o).getMessageID());
+				System.out.println("result : "+ ((MessageWaitingAck) o).getMessageID().equals(getMessageID()));
+				return ((MessageWaitingAck) o).getMessageID().equals(getMessageID());
+				
 			}
+			System.out.println("Not same type ");
 			return false;
 		}
 	}
