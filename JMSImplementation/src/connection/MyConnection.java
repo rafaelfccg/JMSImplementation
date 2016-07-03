@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jms.Connection;
@@ -30,7 +32,7 @@ import session.SessionMessageReceiverListener;
 import topic.MyTopic;
 import utils.ClientRequestHandler;
 
-public class MyConnection implements Connection, MyConnectionSendMessage {
+public class MyConnection implements Connection, MyConnectionSendMessage, Runnable {
 
 	private String clientId;
 	private String hostIp;
@@ -43,18 +45,24 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	private boolean stopped = false;
 	private boolean modified = false;
 	private HashMap<String,ArrayList<SessionMessageReceiverListener>> subscribed;
+	private ConcurrentLinkedQueue<MessageWaitingAck> waitingAck;
+	
 	private ArrayList<Session> sessions;
 	ReentrantLock lock = new ReentrantLock();
+	private Condition messageSent;
 	
 	private static int  id = 0;
 	
 	public  MyConnection(String hostIp, int hostPort){
+		this.lock = new ReentrantLock();
 		this.hostPort = hostPort;
 		this.hostIp = hostIp;
 		this.subscribed = new HashMap<String,ArrayList<SessionMessageReceiverListener>>();
 		this.sessions = new ArrayList<Session>();
 		this.clientId = "CLT:"+UUID.randomUUID().toString()+id;
+		this.messageSent = lock.newCondition();
 		id++;
+		this.waitingAck = new ConcurrentLinkedQueue<MessageWaitingAck>();
 	}
 	private void isOpen() throws JMSException{
 		if(!this.open){
@@ -78,6 +86,10 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 							session.onMessageReceived(msg);
 						}
 					}
+				}else if(query instanceof AckQuery){
+					AckQuery ackQuery = (AckQuery) query;
+					MessageWaitingAck remove = new MessageWaitingAck(ackQuery.getMessageID());
+					this.waitingAck.remove(remove);
 				}
 			} catch (JMSException e) {
 				e.printStackTrace();
@@ -173,6 +185,8 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 						this.receiverConnection.setConnection(this);
 						this.senderConnection.setConnection(this);
 						this.receiverConnection.startMessageReceving();
+						Thread listenAcks = new Thread(this);
+						listenAcks.start();
 						break;
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -205,6 +219,14 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 	public void sendMessage(Message myMessage) throws IOException, JMSException {
 		isOpen();
 		setModified();
+		this.waitingAck.add(new MessageWaitingAck(myMessage));
+		System.out.println("Will signal");
+			this.lock.lock();
+		if(lock.hasWaiters(this.messageSent)){
+			this.messageSent.signal();
+		}
+		this.lock.unlock();
+		
 		MyMessage msg = (MyMessage) myMessage;
 		msg.setReadOnly(true);
 		Query query = new MessageQuery(getClientID(),msg);
@@ -286,5 +308,69 @@ public class MyConnection implements Connection, MyConnectionSendMessage {
 		CreateTopicQuery query = new CreateTopicQuery(getClientID());
 		query.setTopic(my);
 		this.senderConnection.sendMessageAsync(query);
+	}
+	@Override
+	public void run() {
+		System.out.println("Entrou no run");
+		while(true){
+			if(this.waitingAck.isEmpty()){
+				lock.lock();
+				try {
+					this.messageSent.await();
+				} catch (InterruptedException e) {}
+				lock.unlock();
+			}
+			MessageWaitingAck  msg = this.waitingAck.peek();
+			long curr =System.currentTimeMillis();
+			if(msg.getTimestamp() <= curr){
+				try {
+					this.waitingAck.remove(msg);
+					this.sendMessage(msg.getMessage());
+				} catch (IOException | JMSException e) {e.printStackTrace();}
+			}else{
+				try {
+					Thread.sleep(msg.getTimestamp()-curr);
+				} catch (InterruptedException e) {e.printStackTrace();}
+			}
+		}
+	}
+	
+	private class MessageWaitingAck {
+		private Message message;
+		private long timestamp;
+		private String messageId;
+		
+		public MessageWaitingAck(Message message) throws JMSException{
+			this.message =message;
+			this.timestamp =  System.currentTimeMillis() + 10000;
+			this.messageId = message.getJMSMessageID();
+			
+		}
+		
+		public MessageWaitingAck(String messageId) throws JMSException{
+			this.messageId = messageId;
+		}
+		public Message getMessage(){
+			return message;
+		}
+		public String getMessageID() throws JMSException{
+			return messageId;
+		}
+
+		public long getTimestamp() {
+			return timestamp;
+		}
+
+		@Override
+		public boolean equals(Object o){
+			if(o instanceof MessageWaitingAck){
+				try {
+					return ((MessageWaitingAck) o).getMessageID() == getMessageID();
+				} catch (JMSException e) {
+					return false;
+				}
+			}
+			return false;
+		}
 	}
 }

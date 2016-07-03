@@ -66,14 +66,18 @@ public class MyMessageProducer implements MessageProducer{
 	@Override
 	public void send(Message arg0) throws JMSException {
 		try {
+			if(arg0 == null){
+				System.out.println("Message null");
+			}
 			arg0.setJMSDestination(this.destination);
 			arg0.setJMSPriority(this.priority);
 			arg0.setJMSExpiration(this.timeToLive);
 			arg0.setJMSDeliveryMode(this.deliveryMode);
+			if(sessionSend == null){
+				System.out.println("SessionSend  null");
+			}
 			this.sessionSend.send(arg0);
-		} catch(NullPointerException exp){
-			throw new JMSException("This producer is closed");
-		}catch (Exception e) {
+		} catch (Exception e) {
 			Utils.raise(e);
 		}
 	}

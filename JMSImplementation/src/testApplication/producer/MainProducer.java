@@ -34,16 +34,20 @@ public class MainProducer {
 			producer.send(bmsg);
 			
 			while(true){
-				//espera forever
+				Thread.sleep(1000000);
 			}
 		} catch (JMSException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Entrou no JMSExcep");
 			e.printStackTrace();
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}finally{
 			try {
+				System.out.println("Entrou no finally");
 				session.close();
 				connection.close();
 				ctx.close();
