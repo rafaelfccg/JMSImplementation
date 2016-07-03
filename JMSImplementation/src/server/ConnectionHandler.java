@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import javax.jms.JMSException;
 
+import server.misc.MessageAckPair;
 import server.query.AckQuery;
 import server.query.MessageQuery;
 import server.query.Query;
@@ -46,7 +47,7 @@ public class ConnectionHandler implements Runnable{
 	
 	private LinkedBlockingQueue<Object> toSend;
 	
-	private ConcurrentLinkedQueue<Object> waitingAck;
+	private ConcurrentLinkedQueue<MessageAckPair> waitingAck;
 	
 	public ConnectionHandler(int id, Socket socket, Server server) throws IOException{
 		this.id = id;
@@ -57,7 +58,7 @@ public class ConnectionHandler implements Runnable{
 		this.running = true;
 		this.type = ConnectionHandlerType.UNKNOWN;
 		this.toSend = new LinkedBlockingQueue<Object>();
-		this.waitingAck = new ConcurrentLinkedQueue<Object>();
+		this.waitingAck = new ConcurrentLinkedQueue<MessageAckPair>();
 	}
 
 	@Override
@@ -140,6 +141,11 @@ public class ConnectionHandler implements Runnable{
 		
 		this.outputStream.writeObject(query);
 		
+		if(query instanceof MessageQuery){
+			MessageAckPair pair = new MessageAckPair((MessageQuery) query, System.currentTimeMillis());
+			this.waitingAck.add(pair);
+		}
+		
 	}
 
 	/**
@@ -195,6 +201,9 @@ public class ConnectionHandler implements Runnable{
 		
 		// Register this socket in the server
 		this.server.handleRegisterSender(query, this.id);
+		
+		Thread t = new Thread(new MessageManager(this.server, this.waitingAck));
+		t.start();
 	}
 	
 	public Server getServer() {
