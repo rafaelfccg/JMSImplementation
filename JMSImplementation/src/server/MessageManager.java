@@ -21,6 +21,7 @@ public class MessageManager implements Runnable {
 	public void run() {
 		while(true){
 			MessageAckPair curr = queue.peek();
+			if(curr == null) continue;
 			if(curr.getTimestamp() - System.currentTimeMillis() > 10*1000){
 				queue.poll();
 				curr.setTimestamp(System.currentTimeMillis());
