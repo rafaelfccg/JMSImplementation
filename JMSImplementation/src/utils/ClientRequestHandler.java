@@ -65,6 +65,15 @@ public class ClientRequestHandler {
 	 
 	public void send(Object object) throws IOException{
 		this.output.writeObject(object);
+//		try {
+//			Query ack = (Query) this.input.readObject();
+//			if(ack.getType() == QueryType.ACK){
+//				
+//			}
+//		} catch (ClassNotFoundException e) {
+//			IOException ioe =new IOException(e.getMessage());
+//			throw  ioe;
+//		}
 	}
 	public void sendMessageAsync(Query query){
 		MyMessageSender sender = new MyMessageSender();
@@ -117,7 +126,9 @@ public class ClientRequestHandler {
 		public void run() {
 			if(!socket.isClosed()){
 				try {
+					lock.lock();
 					send(message);
+					lock.unlock();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
