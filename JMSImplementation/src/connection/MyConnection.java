@@ -345,7 +345,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		private String messageId;
 		
 		public MessageWaitingAck(Message message) throws JMSException{
-			this.message =message;
+			this.message = message;
 			this.timestamp =  System.currentTimeMillis() + 10000;
 			this.messageId = message.getJMSMessageID();
 			
@@ -368,13 +368,8 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		@Override
 		public boolean equals(Object o){
 			if(o instanceof MessageWaitingAck){
-				System.out.println("compare: "+ getMessageID());
-				System.out.println("with   : "+ ((MessageWaitingAck) o).getMessageID());
-				System.out.println("result : "+ ((MessageWaitingAck) o).getMessageID().equals(getMessageID()));
 				return ((MessageWaitingAck) o).getMessageID().equals(getMessageID());
-				
 			}
-			System.out.println("Not same type ");
 			return false;
 		}
 	}
