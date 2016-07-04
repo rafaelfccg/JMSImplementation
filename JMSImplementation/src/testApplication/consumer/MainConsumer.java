@@ -11,6 +11,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.Topic;
@@ -43,19 +44,19 @@ public class MainConsumer {
 			
 			boolean invalid  = false;
 			do{
-				selected = in.nextInt() -1;
-				invalid = selected < 0 && selected >arr.size();
+				selected = in.nextInt();
+				invalid = selected < 0 && selected >(arr.size()+1);
 				if(invalid){
 					System.out.println("Please select a valid channel");
 				}
 			}while(invalid);
-			if(selected == 0) return 0;
+			if(selected == 0) return -1;
 			if(selected == arr.size()+1){
 				arr = admin.getTopicList();
 				map = admin.getSubscribersCount();
 			}
 		}while(selected == arr.size()+1);
-		return selected;
+		return selected-1;
 	}
 	
 	public static void main(String[] args) {
@@ -84,12 +85,13 @@ public class MainConsumer {
 					if(exit == 0) return;
 				}
 				int selected = selectChannelFromContext(admin);;
-				if(selected == 0) return ;
+				if(selected == -1) return ;
 				
 				System.out.println("You may quit the streaming any time by typing 0");
 				System.out.println("Connection The game");
 				
 				MessageConsumer consumer  = session.createConsumer(arr.get(selected));
+				
 				consumer.setMessageListener(new MessageListener() {
 					@Override
 					public void onMessage(Message arg0) {
@@ -112,6 +114,11 @@ public class MainConsumer {
 						}
 					}
 				});
+				
+				MessageProducer producer  = session.createProducer(arr.get(selected));
+				BytesMessage bmsg = session.createBytesMessage();
+				bmsg.writeUTF("Consumer Entrou na sala");
+				producer.send(bmsg);
 				
 				while(exit != 0){
 					exit = in.nextInt();
