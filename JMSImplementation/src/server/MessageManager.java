@@ -37,8 +37,10 @@ public class MessageManager implements Runnable {
 					this.server.getReceivers().get(curr.getMessage().getClientId()).getToSend().add(curr.getMessage());
 				}else{
 					long time =  curr.getTimeout() - System.currentTimeMillis();
-					if(time > 0)
+					if(time > 0){
+						this.lock.unlock();
 						Thread.sleep(time);
+					}
 				}
 				queue.add(curr);
 			}catch(NullPointerException e){ 
