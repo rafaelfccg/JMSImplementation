@@ -41,7 +41,9 @@ public class MessageManager implements Runnable {
 						Thread.sleep(time);
 				}
 				queue.add(curr);
-			} catch (JMSException | InterruptedException e) {
+			}catch(NullPointerException e){ 
+				queue.remove();
+			}catch (JMSException |InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}finally{

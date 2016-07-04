@@ -10,15 +10,18 @@ import java.util.logging.Logger;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.ObjectMessage;
 import javax.jms.Topic;
 
 import messages.MyBytesMessage;
+import messages.MyObjectMessage;
 import server.query.AckQuery;
 import server.query.MessageQuery;
 import server.query.Query;
 import server.query.SubscriberQuery;
 import server.query.TopicQuery;
 import topic.MyTopic;
+import utils.Utils;
 
 public class Server {
 	
@@ -63,6 +66,8 @@ public class Server {
 	}
 	
 	public void init() throws IOException{
+		TopicQuery tqry = new TopicQuery("0",Utils.LIST_TOPIC);
+		handleCreateTopic(tqry);
 		
 		while(true){
 			
@@ -101,10 +106,18 @@ public class Server {
 		this.topicManager.create(query.getName());
 	}
 	
-	public void handleSubscribe(SubscriberQuery query) {
+	public void handleSubscribe(SubscriberQuery query) throws JMSException, InterruptedException {
 		logger.log(Level.INFO, "Client {0} subscribed to topic {1}", new Object[]{ query.getClientId(), query.getTopic() });
 		this.topicManager.subscribe(query.getTopic(), query.getClientId());
 		System.out.println(this.topicManager.dump());
+		if(query.getTopic().equals(Utils.LIST_TOPIC)){
+			MyObjectMessage omsg = new MyObjectMessage();
+			omsg.setJMSDestination(new MyTopic(query.getTopic()));
+			ArrayList<Topic> arr = this.topicManager.getTopicList();
+			omsg.setObject(arr);
+			MessageQuery qry = new MessageQuery("0", omsg);
+			this.topicManager.addMessageToTopic(Utils.LIST_TOPIC, qry);
+		}
 	}
 	
 	public void handleUnsubscribe(SubscriberQuery query) {

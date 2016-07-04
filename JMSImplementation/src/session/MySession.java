@@ -3,7 +3,10 @@ package session;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -41,15 +44,17 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	boolean transacted;
 	int acknowledgeMode;
 	MessageListener messageListener;
-	HashMap<String, ArrayList<MessageListener>> subscribedList;
+	ConcurrentHashMap<String, List<MessageListener>> subscribedList;
 	boolean closed;
+	boolean isClosing;
 	
 	public MySession(boolean trans, int ack, MyConnectionSendMessage connection){
 		this.transacted = trans;
 		this.acknowledgeMode = ack;
 		this.connection = connection;
-		this.subscribedList = new HashMap<String, ArrayList<MessageListener>>();
+		this.subscribedList = new ConcurrentHashMap<String, List<MessageListener>>();
 		closed = false;
+		isClosing = false;
 	}
 	
 	public void isOpen() throws JMSException{
@@ -60,11 +65,12 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	@Override
 	public void close() throws JMSException {
 		synchronized (this) {
+			isClosing = true;
 			if(!closed){
 				closed = true;
 				connection.closeSession(this);
 				for(String d : subscribedList.keySet()){
-					ArrayList<MessageListener> arr = this.subscribedList.get(d);
+					List<MessageListener> arr = this.subscribedList.get(d);
 					for(MessageListener msg : arr){
 						if(msg instanceof MessageConsumer){
 							MessageConsumer msgC = (MessageConsumer) msg;
@@ -115,12 +121,14 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 			MyMessageConsumer msgConsumer = new MyMessageConsumer(destination, selector,noLocal,this);
 			this.connection.subscribe(destination, this);
 			Topic topic  = (Topic) destination;
-			ArrayList<MessageListener> list = this.subscribedList.get(topic.getTopicName());
-			if( list == null){
-				list = new ArrayList<MessageListener>();
+			synchronized (this) {
+				List<MessageListener> list = this.subscribedList.get(topic.getTopicName());
+				if( list == null){
+					list =  Collections.synchronizedList(new ArrayList<MessageListener>());;
+				}
+				list.add(msgConsumer);
+				this.subscribedList.put(topic.getTopicName(), list);
 			}
-			list.add(msgConsumer);
-			this.subscribedList.put(topic.getTopicName(), list);
 			return msgConsumer;
 		} catch (IOException e) {
 			Utils.raise(e);
@@ -262,10 +270,12 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 		msg.setSessionAck(this);
 		try {
 			destination = (Topic)msg.getJMSDestination();
-			ArrayList<MessageListener> consumers = this.subscribedList.get(destination.getTopicName());
-			
-			for(MessageListener consumer : consumers ){
-				consumer.onMessage(msg);
+			synchronized (this) {
+				List<MessageListener> consumers = this.subscribedList.get(destination.getTopicName());
+				
+				for(MessageListener consumer : consumers ){
+					consumer.onMessage(msg);
+				}
 			}
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -289,8 +299,15 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	@Override
 	public void closeConsumer(MyMessageConsumer consumer) throws JMSException {
 		Topic topic = (Topic)consumer.getDestination();
-		ArrayList<MessageListener> arr = this.subscribedList.get(topic.getTopicName());
-		arr.remove(consumer);
+		synchronized (this) {
+			if(!isClosing){
+				List<MessageListener> arr = this.subscribedList.get(topic.getTopicName());
+				arr.remove(consumer);
+				if(arr.isEmpty()){
+					unsubscribe(topic.getTopicName());
+				}	
+			}
+		}
 	}
 
 	@Override

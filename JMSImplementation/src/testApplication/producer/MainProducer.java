@@ -1,5 +1,6 @@
 package testApplication.producer;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import javax.jms.BytesMessage;
@@ -10,10 +11,12 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
+import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import myJmsAPI.MyJmsAPI;
 import session.MySession;
 import test.TickTackToe;
 import topic.MyTopic;
@@ -32,12 +35,23 @@ public class MainProducer {
 		int rematch = 1;
 		try {
 			ctx = new InitialContext(Utils.enviroment());
+			
 			cfactory = (ConnectionFactory)ctx.lookup("ConnectionFactory");
 			connection = cfactory.createConnection();				
 			session = connection.createSession(false, MySession.AUTO_ACKNOWLEDGE);
 			Destination topic = new MyTopic("TickTackToe");
 			producer  = session.createProducer(topic);
 			connection.start();
+			session.createTopic("abc");
+			session.createTopic("abc/dcd");
+			session.createTopic("abc/mjs");
+			session.createTopic("bhs");
+			Thread.sleep(1000);
+			ArrayList<Topic> arr = MyJmsAPI.requestTopicList(ctx);
+			System.out.println(arr.size());
+			for(int i = 0 ; i < arr.size(); i++){
+				System.out.println(arr.get(i).getTopicName());
+			}
 			
 			sendText("The Biggest TickTackToe event of the world will begin!");
 			while(rematch ==1){
@@ -62,6 +76,9 @@ public class MainProducer {
 		} catch (JMSException e) {
 			e.printStackTrace();
 		} catch (NamingException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally{
 			try {

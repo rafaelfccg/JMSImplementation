@@ -26,6 +26,7 @@ import server.query.MessageQuery;
 import server.query.Query;
 import server.query.QueryType;
 import server.query.SubscriberQuery;
+import server.query.TopicQuery;
 import server.query.UnsubscriberQuery;
 import session.MySession;
 import session.SessionMessageReceiverListener;
@@ -303,8 +304,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 	}
 	@Override
 	public void createTopic(Topic my) throws IOException, JMSException {
-		CreateTopicQuery query = new CreateTopicQuery(getClientID());
-		query.setTopic(my);
+		TopicQuery query = new TopicQuery(my.getTopicName(), getClientID());
 		this.senderConnection.sendMessageAsync(query);
 	}
 	@Override

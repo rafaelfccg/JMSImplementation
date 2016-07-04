@@ -6,6 +6,8 @@ import javax.jms.JMSException;
 import javax.naming.Context;
 
 public class Utils {
+	
+	public static final String LIST_TOPIC = "myJMSListTopics";
 	public static void raise(Exception exception) throws JMSException {
 		JMSException error = new JMSException(exception.getMessage());
 		error.setLinkedException(exception);

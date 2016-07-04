@@ -90,7 +90,10 @@ public class ConnectionHandler implements Runnable{
 				
 			} catch (Exception e) {
 				this.running = false;
-				e.printStackTrace();
+				if(!(e instanceof java.io.EOFException)){
+					e.printStackTrace();
+				}
+				
 			}
 		}
 		
@@ -184,7 +187,7 @@ public class ConnectionHandler implements Runnable{
 				this.server.getReceivers().get(this.clientId).getWaitingAck().add(pair);
 			}
 		}finally{
-			ackLock.unlock();
+			if(ackLock.isLocked())ackLock.unlock();
 		}
 		
 	}

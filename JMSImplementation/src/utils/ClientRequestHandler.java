@@ -25,6 +25,7 @@ public class ClientRequestHandler {
 	
 	private MyConnection connection;
 	ReentrantLock lock;
+	Thread receiverThread; 
 	
 	
 	public ClientRequestHandler(String hostname, int port,boolean isSubscriber, String clientId) throws UnknownHostException, ClassNotFoundException , IOException{
@@ -86,11 +87,17 @@ public class ClientRequestHandler {
 	}
 	
 	public void closeConnection() throws IOException{
-		this.socket.close();
+		try{
+			this.socket.shutdownInput();
+			this.socket.close();
+		}catch(Exception e){
+			
+		}
+		
 	}
 	public void startMessageReceving(){
-		Thread receiver = new Thread(new MyMessageReceiver());
-		receiver.start();
+		this.receiverThread = new Thread(new MyMessageReceiver());
+		receiverThread.start();
 	}
 	
 	private class MyMessageReceiver implements Runnable{
@@ -106,8 +113,10 @@ public class ClientRequestHandler {
 				} catch (ClassNotFoundException e) {
 					System.err.println("Wrong message Type Received");
 					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					if(!socket.isClosed() && !(e instanceof java.io.EOFException)){
+						e.printStackTrace();
+					}
 				}
 			}
 		}

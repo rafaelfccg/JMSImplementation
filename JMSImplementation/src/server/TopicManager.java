@@ -3,12 +3,17 @@ package server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import javax.jms.Topic;
+
 import server.query.MessageQuery;
+import topic.MyTopic;
 
 public class TopicManager {
 
@@ -193,6 +198,22 @@ public class TopicManager {
 
 	public void setLastUpdatedTopics(LinkedBlockingQueue<String> lastUpdatedTopics) {
 		this.lastUpdatedTopics = lastUpdatedTopics;
+	}
+	
+	public ArrayList<Topic> getTopicList(){
+		ArrayList<Topic> list = new ArrayList<Topic>();
+		ArrayList<Node> nodeList  = new ArrayList<Node>();
+		nodeList.add(this.root);
+		for(int i = 0; i< nodeList.size(); i++){
+			HashMap<String,Node> children = nodeList.get(i).getChildren();
+			Set<Entry<String,Node>> set  = children.entrySet();
+			for(Entry<String,Node> entry : set){
+				nodeList.add(entry.getValue());
+			}
+			list.add(new MyTopic(nodeList.get(i).getName()));
+		}
+		
+		return list;
 	}
 	
 }
