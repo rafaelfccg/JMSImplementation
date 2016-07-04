@@ -177,10 +177,8 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 					numberOfTries++;
 					try {
 						receiverConnection = new ClientRequestHandler(hostIp, hostPort, true, getClientID());
-						System.out.println("Connected receiver");
 						senderConnection = new ClientRequestHandler(hostIp, hostPort, false, getClientID());
 						this.open = true;
-						System.out.println("Connected sender");
 						this.stopped = false;
 						this.receiverConnection.setConnection(this);
 						this.senderConnection.setConnection(this);
