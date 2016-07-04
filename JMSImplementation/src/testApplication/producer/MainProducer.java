@@ -1,5 +1,7 @@
 package testApplication.producer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import javax.jms.BytesMessage;
@@ -10,9 +12,13 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
+import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+
+import connection.MyConnectionAdmin;
 
 import session.MySession;
 import test.TickTackToe;
@@ -28,7 +34,7 @@ public class MainProducer {
 	static ConnectionFactory cfactory = null;
 	static MessageProducer producer;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		int rematch = 1;
 		try {
 			ctx = new InitialContext(Utils.enviroment());
@@ -39,7 +45,20 @@ public class MainProducer {
 			Destination topic = new MyTopic("TickTackToe");
 			producer  = session.createProducer(topic);
 			connection.start();
+
+			MyConnectionAdmin admin = new MyConnectionAdmin(connection);
 			
+			session.createTopic("abc");
+			session.createTopic("abc/dcd");
+			session.createTopic("abc/mjs");
+			session.createTopic("bhs");
+			Thread.sleep(1000);
+			ArrayList<Topic> arr = admin.getTopicList();
+			HashMap<String, Integer> map = admin.getSubscribersCount();
+			for(int i = 0 ; i < arr.size(); i++){
+				System.out.println("> " + arr.get(i).getTopicName() + " (" + map.get(arr.get(i).getTopicName()) + ")");
+			}
+
 			sendText("The Biggest TickTackToe event of the world will begin!");
 			while(rematch ==1){
 				TickTackToe game = new TickTackToe();

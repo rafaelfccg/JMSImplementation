@@ -18,7 +18,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import myJmsAPI.MyJmsAPI;
+import connection.MyConnectionAdmin;
 import session.MySession;
 import test.TickTackToe;
 import topic.MyTopic;
@@ -27,9 +27,9 @@ import utils.Utils;
 public class MainConsumer {
 	private static Scanner in;
 	private static ArrayList<Topic> arr;
-	public static int selectChannelFromContext(Context ctx) throws JMSException, NamingException{
+	public static int selectChannelFromContext(MyConnectionAdmin admin) throws JMSException, NamingException{
 		int selected = 0;
-		arr = MyJmsAPI.requestTopicList(ctx);
+		arr = admin.getTopicList();
 		do{
 			System.out.println("Select one of the opened channels:");
 			System.out.println("0 - Quit Application");
@@ -47,7 +47,7 @@ public class MainConsumer {
 				}
 			}while(invalid);
 			if(selected == 0) return 0;
-			if(selected == arr.size()+1) arr = MyJmsAPI.requestTopicList(ctx);
+			if(selected == arr.size()+1) arr = admin.getTopicList();
 		}while(selected == arr.size()+1);
 		return selected;
 	}
@@ -63,8 +63,11 @@ public class MainConsumer {
 			cfactory = (ConnectionFactory)ctx.lookup("ConnectionFactory");
 			connection = cfactory.createConnection();		
 			session= connection.createSession(false, MySession.AUTO_ACKNOWLEDGE);
+			connection.start();
 			int exit = -1;
 			in = new Scanner(System.in);
+			
+			MyConnectionAdmin admin = new MyConnectionAdmin(connection);
 			
 			while(true){
 				while(exit != 1){
@@ -73,12 +76,12 @@ public class MainConsumer {
 					exit = in.nextInt();
 					if(exit == 0) return;
 				}
-				int selected = selectChannelFromContext(ctx);;
+				int selected = selectChannelFromContext(admin);;
 				if(selected == 0) return ;
 				
 				System.out.println("You may quit the streaming any time by typing 0");
 				System.out.println("Connection The game");
-				connection.start();
+				
 				MessageConsumer consumer  = session.createConsumer(arr.get(selected));
 				consumer.setMessageListener(new MessageListener() {
 					@Override

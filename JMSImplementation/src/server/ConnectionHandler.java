@@ -93,7 +93,6 @@ public class ConnectionHandler implements Runnable{
 				if(!(e instanceof java.io.EOFException)){
 					e.printStackTrace();
 				}
-				
 			}
 		}
 		
@@ -118,6 +117,7 @@ public class ConnectionHandler implements Runnable{
 	 * @throws InterruptedException 
 	 */
 	private void handleReceivedMessages() throws ClassNotFoundException, IOException, JMSException, InterruptedException{
+
 		Query query = (Query) this.inputStream.readObject();
 
 		switch(query.getType()){
@@ -187,7 +187,7 @@ public class ConnectionHandler implements Runnable{
 				this.server.getReceivers().get(this.clientId).getWaitingAck().add(pair);
 			}
 		}finally{
-			if(ackLock.isLocked())ackLock.unlock();
+			if(ackLock.isHeldByCurrentThread())ackLock.unlock();
 		}
 		
 	}

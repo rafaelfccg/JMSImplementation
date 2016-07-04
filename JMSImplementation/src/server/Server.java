@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,7 +14,9 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Topic;
 
+import connection.MyConnectionAdmin;
 import messages.MyBytesMessage;
+import messages.MyMapMessage;
 import messages.MyObjectMessage;
 import server.query.AckQuery;
 import server.query.MessageQuery;
@@ -53,12 +56,15 @@ public class Server {
 	 */
 	private TopicManager topicManager;
 	
+	private AdminManager adminManager;
+	
 	public Server(int port) throws IOException{
 		this.serverSocket = new ServerSocket(port);
 		this.handlers = new HashMap<Integer, ConnectionHandler>();
 		this.senders = new HashMap<String, ConnectionHandler>();
 		this.receivers = new HashMap<String, ConnectionHandler>();
 		this.topicManager = new TopicManager();
+		this.adminManager = new AdminManager(this);
 		
 		MessageForwarder dispatcher = new MessageForwarder(this.topicManager, this);
 		Thread t = new Thread(dispatcher);
@@ -66,8 +72,6 @@ public class Server {
 	}
 	
 	public void init() throws IOException{
-		TopicQuery tqry = new TopicQuery("0",Utils.LIST_TOPIC);
-		handleCreateTopic(tqry);
 		
 		while(true){
 			
@@ -110,14 +114,8 @@ public class Server {
 		logger.log(Level.INFO, "Client {0} subscribed to topic {1}", new Object[]{ query.getClientId(), query.getTopic() });
 		this.topicManager.subscribe(query.getTopic(), query.getClientId());
 		System.out.println(this.topicManager.dump());
-		if(query.getTopic().equals(Utils.LIST_TOPIC)){
-			MyObjectMessage omsg = new MyObjectMessage();
-			omsg.setJMSDestination(new MyTopic(query.getTopic()));
-			ArrayList<Topic> arr = this.topicManager.getTopicList();
-			omsg.setObject(arr);
-			MessageQuery qry = new MessageQuery("0", omsg);
-			this.topicManager.addMessageToTopic(Utils.LIST_TOPIC, qry);
-		}
+		
+		adminManager.handle(query);
 	}
 	
 	public void handleUnsubscribe(SubscriberQuery query) {
@@ -181,4 +179,11 @@ public class Server {
 		this.receivers = receivers;
 	}
 
+	public TopicManager getTopicManager() {
+		return topicManager;
+	}
+
+	public void setTopicManager(TopicManager topicManager) {
+		this.topicManager = topicManager;
+	}
 }
