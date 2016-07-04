@@ -304,7 +304,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 	}
 	@Override
 	public void createTopic(Topic my) throws IOException, JMSException {
-		TopicQuery query = new TopicQuery(my.getTopicName(), getClientID());
+		TopicQuery query = new TopicQuery(getClientID(), my.getTopicName());
 		this.senderConnection.sendMessageAsync(query);
 	}
 	@Override

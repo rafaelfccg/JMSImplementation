@@ -2,6 +2,10 @@ package server.query;
 
 public class TopicQuery extends Query {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7838204593160234378L;
 	private String name;
 
 	public TopicQuery(String clientId, String name) {
