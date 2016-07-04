@@ -35,7 +35,6 @@ import messages.MyMessageConsumer;
 import messages.MyMessageProducer;
 import messages.MyObjectMessage;
 import topic.MyTopic;
-import topic.MyTopicSubscriber;
 import utils.Utils;
 
 public class MySession implements Session, SessionMessageReceiverListener, SessionConsumerOperations, MessageAckSession,MySessionMessageSend{
@@ -144,9 +143,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 	@Override
 	public TopicSubscriber createDurableSubscriber(Topic topic, String name, String messageSelector, boolean noLocal)
 			throws JMSException {
-		MyTopicSubscriber tsubs = new MyTopicSubscriber(topic, name, messageSelector, noLocal, this);
-		
-		return tsubs;
+		throw new JMSException("Not Implemented method");
 	}
 
 	@Override
