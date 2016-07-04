@@ -41,13 +41,8 @@ public class AdminManager {
 		MyObjectMessage omsg = new MyObjectMessage();
 		omsg.setJMSDestination(new MyTopic(query.getTopic()));
 		ArrayList<Topic> arr = this.server.getTopicManager().getTopicList();
-		ArrayList<Topic> filtered = new ArrayList<Topic>();
-		for(Topic t: arr){
-			if(t.getTopicName().equals("/") 
-					|| t.getTopicName().equals(MyConnectionAdmin.LIST_TOPICS)) continue;
-			System.out.println(t.getTopicName());
-			filtered.add(t);
-		}
+		ArrayList<Topic> filtered = filter(arr);
+		
 		omsg.setObject(filtered);
 		MessageQuery qry = new MessageQuery("0", omsg);
 		this.server.getTopicManager().addMessageToTopic(MyConnectionAdmin.LIST_TOPICS, qry);

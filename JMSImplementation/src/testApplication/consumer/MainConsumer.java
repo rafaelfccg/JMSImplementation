@@ -1,12 +1,12 @@
 package testApplication.consumer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -21,22 +21,25 @@ import javax.naming.NamingException;
 import connection.MyConnectionAdmin;
 import session.MySession;
 import test.TickTackToe;
-import topic.MyTopic;
 import utils.Utils;
 
 public class MainConsumer {
 	private static Scanner in;
 	private static ArrayList<Topic> arr;
+	
 	public static int selectChannelFromContext(MyConnectionAdmin admin) throws JMSException, NamingException{
 		int selected = 0;
 		arr = admin.getTopicList();
+		HashMap<String, Integer> map = admin.getSubscribersCount();
+
 		do{
 			System.out.println("Select one of the opened channels:");
 			System.out.println("0 - Quit Application");
 			for(int i = 0 ; i< arr.size(); i++){
-				System.out.println((i+1)+" - "+arr.get(i).getTopicName());
+				System.out.println((i+1)+" - "+arr.get(i).getTopicName()+" (" + map.get(arr.get(i).getTopicName()) + ")");
 			}
 			System.out.println(arr.size()+1+" - Refresh Channels");
+			
 			
 			boolean invalid  = false;
 			do{
@@ -47,10 +50,14 @@ public class MainConsumer {
 				}
 			}while(invalid);
 			if(selected == 0) return 0;
-			if(selected == arr.size()+1) arr = admin.getTopicList();
+			if(selected == arr.size()+1){
+				arr = admin.getTopicList();
+				map = admin.getSubscribersCount();
+			}
 		}while(selected == arr.size()+1);
 		return selected;
 	}
+	
 	public static void main(String[] args) {
 		ConnectionFactory cfactory = null;
 		Connection connection = null;
@@ -125,6 +132,7 @@ public class MainConsumer {
 				session.close();
 				connection.close();
 				ctx.close();
+				System.exit(0);
 			} catch (JMSException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

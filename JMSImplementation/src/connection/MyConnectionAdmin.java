@@ -58,7 +58,6 @@ public class MyConnectionAdmin{
 		Topic topic = new MyTopic(MyConnectionAdmin.TOPICS_CONSUMERS);
 
 		MessageConsumer consumer = session.createConsumer(topic);
-		ArrayList<Topic> list = null;
 		MyMapMessage message  = (MyMapMessage)consumer.receive();
 		session.close();
 		HashMap<String, Integer> map = new HashMap<String, Integer>();

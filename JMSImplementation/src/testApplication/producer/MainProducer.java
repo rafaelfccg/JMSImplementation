@@ -33,6 +33,7 @@ public class MainProducer {
 	static Session session = null;
 	static ConnectionFactory cfactory = null;
 	static MessageProducer producer;
+	private static Scanner scanner2;
 	
 	public static void main(String[] args) throws InterruptedException {
 		int rematch = 1;
@@ -42,30 +43,18 @@ public class MainProducer {
 			cfactory = (ConnectionFactory)ctx.lookup("ConnectionFactory");
 			connection = cfactory.createConnection();				
 			session = connection.createSession(false, MySession.AUTO_ACKNOWLEDGE);
-			Destination topic = new MyTopic("TickTackToe");
+			scanner2 = new Scanner(System.in);
+			System.out.println("Give a name to your channel");
+			String s = scanner2.nextLine();
+			Destination topic = new MyTopic(s);
 			producer  = session.createProducer(topic);
 			connection.start();
-
-			MyConnectionAdmin admin = new MyConnectionAdmin(connection);
 			
 			session.createTopic("abc");
 			session.createTopic("abc/dcd");
 			session.createTopic("abc/mjs");
 			session.createTopic("bhs");
 			Thread.sleep(1000);
-			ArrayList<Topic> arr = admin.getTopicList();
-			HashMap<String, Integer> map = admin.getSubscribersCount();
-			for(int i = 0 ; i < arr.size(); i++){
-				System.out.println("> " + arr.get(i).getTopicName() + " (" + map.get(arr.get(i).getTopicName()) + ")");
-			}
-			
-			HashMap<String, HashMap<String, Double>> stats = admin.getTopicsStats();
-			
-			for(String t: stats.keySet()){
-				System.out.println("Topic: " + t);
-				System.out.println("   - Avg messages per minute: " + stats.get(t).get("average_messages_per_minute"));
-				System.out.println("   - Total messages: " + stats.get(t).get("total_messages"));
-			}
 
 			sendText("The Biggest TickTackToe event of the world will begin!");
 			while(rematch ==1){
