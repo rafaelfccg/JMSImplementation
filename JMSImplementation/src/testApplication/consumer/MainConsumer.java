@@ -1,5 +1,7 @@
 package testApplication.consumer;
 
+import java.util.Scanner;
+
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -20,6 +22,8 @@ import topic.MyTopic;
 import utils.Utils;
 
 public class MainConsumer {
+	private static Scanner in;
+
 	public static void main(String[] args) {
 		ConnectionFactory cfactory = null;
 		Connection connection = null;
@@ -33,6 +37,18 @@ public class MainConsumer {
 			connection = cfactory.createConnection();		
 			session= connection.createSession(false, MySession.AUTO_ACKNOWLEDGE);
 			Destination topic = new MyTopic("TickTackToe");
+			
+			int exit = -1;
+			in = new Scanner(System.in);
+			while(exit != 1){
+				System.out.println("If you want to start the streaming please type 1");
+				System.out.println("If you want to quit the application please type 0");
+				exit = in.nextInt();
+				if(exit == 0) return;
+			}
+			System.out.println("You may quit the streaming any time by typing 0");
+			Thread.sleep(1000);
+			System.out.println("Connection The game");
 			connection.start();
 			MessageConsumer consumer  = session.createConsumer(topic);
 			consumer.setMessageListener(new MessageListener() {
@@ -52,7 +68,6 @@ public class MainConsumer {
 							game = (TickTackToe) ((ObjectMessage) arg0).getObject();
 							game.printGame();
 						} catch (JMSException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						
@@ -61,15 +76,18 @@ public class MainConsumer {
 				}
 			});
 			
-			while(true){
-				//faz nada só escuta passivamente
+			while(exit != 0){
+				exit = in.nextInt();
+				if(exit!= 0){
+					System.out.println("You may quit the streaming any time by typing 0");
+				}
 			}
 			
 			
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (NamingException e1) {
+		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}finally{

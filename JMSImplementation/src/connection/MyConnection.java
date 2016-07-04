@@ -110,8 +110,8 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		setModified();
 		this.open = false;
 		try {
-			this.receiverConnection.closeConnection();
-			this.senderConnection.closeConnection();
+			if(this.receiverConnection != null) this.receiverConnection.closeConnection();
+			if(this.senderConnection != null) this.senderConnection.closeConnection();
 		} catch (IOException e) {
 			callExceptionListener(e);
 			e.printStackTrace();

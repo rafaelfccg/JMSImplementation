@@ -1,5 +1,7 @@
 package testApplication.producer;
 
+import java.util.Scanner;
+
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -19,6 +21,7 @@ import utils.Utils;
 
 public class MainProducer {
 	
+	private static final Scanner SCANNER = new Scanner(System.in);
 	static Context ctx = null;
 	static Connection connection = null;
 	static Session session = null;
@@ -26,7 +29,7 @@ public class MainProducer {
 	static MessageProducer producer;
 	
 	public static void main(String[] args) {
-
+		int rematch = 1;
 		try {
 			ctx = new InitialContext(Utils.enviroment());
 			cfactory = (ConnectionFactory)ctx.lookup("ConnectionFactory");
@@ -37,40 +40,37 @@ public class MainProducer {
 			connection.start();
 			
 			sendText("The Biggest TickTackToe event of the world will begin!");
-			
-			TickTackToe game = new TickTackToe();
-			//sendBoard(game);
-			while (!game.getHasWinner()) {
-				sendText("Waiting nextMove from player "+(game.getTurn()+1));
-				game.nextMove();
-				game.printGame();
+			while(rematch ==1){
+				TickTackToe game = new TickTackToe();
 				sendBoard(game);
+				while (!game.getHasWinner()) {
+					sendText("Waiting nextMove from player "+(game.getTurn()+1));
+					game.nextMove();
+					game.printGame();
+					sendBoard(game);
+				}
+				sendText("The winner was player: "+ game.getWinner());
+				System.out.println("Play another Match?(1 for YES , 0 to NO)");
+				rematch = SCANNER.nextInt();
+				if(rematch == 1){
+					sendText("Next match will be in few...");
+				}else{
+					sendText("This is all for today, thank you for watching!");
+				}
 			}
-			sendText("The winner was player: "+ game.getWinner());
-			
-			while(true){
-				Thread.sleep(1000000);
-			}
+	
 		} catch (JMSException e) {
-			System.out.println("Entrou no JMSExcep");
 			e.printStackTrace();
 		} catch (NamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally{
 			try {
-				System.out.println("Entrou no finally");
 				session.close();
 				connection.close();
 				ctx.close();
 			} catch (NamingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (JMSException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -78,6 +78,7 @@ public class MainProducer {
 	
 	
 	public static void sendText(String msg) throws JMSException{
+		System.out.println(msg);
 		BytesMessage bmsg = session.createBytesMessage();
 		bmsg.writeUTF(msg);
 		producer.send(bmsg);

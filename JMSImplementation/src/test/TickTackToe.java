@@ -55,13 +55,7 @@ public class TickTackToe implements Serializable, Externalizable, Cloneable {
 	private Scanner in;
 	
 	public TickTackToe() {
-		game  = new ArrayList<ArrayList<Integer>>();
-		for(int i =0 ; i< 3;i++){
-			game.add(new ArrayList<Integer>());
-			for(int j =0 ; j< 3;j++){
-				game.get(i).add(-1);
-			}
-		}
+		gameRestart();
 		turn = 0;
 	}
 	
@@ -84,10 +78,22 @@ public class TickTackToe implements Serializable, Externalizable, Cloneable {
 	}
 	
 	public void nextMove(){
+		System.out.println("Please give movements coordinates:(row and column 1 to 3)");
 		in = new Scanner(System.in);
-		int x = in.nextInt();
-		int y = in.nextInt();
-		 playAt(y, x);
+		int x = 0;
+		int y = 0;
+		boolean invalid;
+		do{
+			x = in.nextInt();
+			y = in.nextInt();
+			invalid = x <0 && x > 3 && y<0 && y>3;
+			if(invalid){
+				System.out.println("Invalid position, please try again.");
+			}
+		}while(invalid);
+		x--;
+		y--;
+		playAt(x, y);
 	}
 	public boolean playAt(int i, int j){
 		if(game.get(i).get(j) != -1) return false;
@@ -123,7 +129,16 @@ public class TickTackToe implements Serializable, Externalizable, Cloneable {
 	public void setWinner(int winner) {
 		this.winner = winner;
 	}
-
+	
+	public void gameRestart(){
+		game  = new ArrayList<ArrayList<Integer>>();
+		for(int i =0 ; i< 3;i++){
+			game.add(new ArrayList<Integer>());
+			for(int j =0 ; j< 3;j++){
+				game.get(i).add(-1);
+			}
+		}
+	}
 	
 	
 }
