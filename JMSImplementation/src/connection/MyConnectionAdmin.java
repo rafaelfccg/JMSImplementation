@@ -18,6 +18,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import messages.MyMapMessage;
+import messages.MyObjectMessage;
 import topic.MyTopic;
 import utils.Utils;
 
@@ -29,6 +30,8 @@ public class MyConnectionAdmin{
 	
 	public static final String TOPICS_CONSUMERS = "admin_topics_consumers";
 	
+	public static final String TOPICS_STATS = "admin_topics_stats";
+	
 	public MyConnectionAdmin(Connection connection) {
 		super();
 		this.connection = connection;
@@ -38,7 +41,7 @@ public class MyConnectionAdmin{
 	public ArrayList<Topic> getTopicList() throws NamingException, JMSException{
 		Session session  = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		Topic topic = new MyTopic(MyConnectionAdmin.LIST_TOPICS);
-		connection.start();
+
 		MessageConsumer consumer = session.createConsumer(topic);
 		ArrayList<Topic> list = null;
 		Message message  = consumer.receive();
@@ -53,7 +56,7 @@ public class MyConnectionAdmin{
 	public HashMap<String, Integer> getSubscribersCount() throws NamingException, JMSException{
 		Session session  = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		Topic topic = new MyTopic(MyConnectionAdmin.TOPICS_CONSUMERS);
-		connection.start();
+
 		MessageConsumer consumer = session.createConsumer(topic);
 		ArrayList<Topic> list = null;
 		MyMapMessage message  = (MyMapMessage)consumer.receive();
@@ -62,6 +65,24 @@ public class MyConnectionAdmin{
 		for (Enumeration<String> e = message.getMapNames(); e.hasMoreElements();){
 			String t = e.nextElement();
 			map.put(t, message.getInt(t));
+		}
+		return map;
+	}
+	
+	public HashMap<String, HashMap<String, Double>> getTopicsStats() throws NamingException, JMSException{
+		Session session  = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		Topic topic = new MyTopic(MyConnectionAdmin.TOPICS_STATS);
+		MessageConsumer consumer = session.createConsumer(topic);
+
+		MyMapMessage message  = (MyMapMessage)consumer.receive();
+		session.close();
+		HashMap<String, HashMap<String, Double>> map = new HashMap<String, HashMap<String, Double>>();
+		
+		for (Enumeration<String> e = message.getMapNames(); e.hasMoreElements();){
+			String t = e.nextElement();
+			HashMap<String, Double> stat = (HashMap<String, Double>) message.getObject(t);
+			
+			map.put(t, stat);
 		}
 		return map;
 	}

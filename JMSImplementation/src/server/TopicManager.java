@@ -29,12 +29,18 @@ public class TopicManager {
 		
 		private PriorityBlockingQueue<MessageQuery> messages;
 		
+		private int totalMessages;
+		
+		private long timestamp;
+		
 		public Node(String name, Node parent){
 			this.name = name;
 			this.parent = parent;
 			this.subscribed = new ArrayList<String>();
 			this.children = new HashMap<String, Node>();
 			this.messages = new PriorityBlockingQueue<MessageQuery>();
+			this.totalMessages = 0;
+			this.timestamp = System.currentTimeMillis();
 		}
 
 		public ArrayList<String> getSubscribed() {
@@ -76,6 +82,22 @@ public class TopicManager {
 		public void setParent(Node parent) {
 			this.parent = parent;
 		}
+
+		public int getTotalMessages() {
+			return totalMessages;
+		}
+
+		public void setTotalMessages(int totalMessages) {
+			this.totalMessages = totalMessages;
+		}
+
+		public long getTimestamp() {
+			return timestamp;
+		}
+
+		public void setTimestamp(long timestamp) {
+			this.timestamp = timestamp;
+		}
 		
 	}
 	
@@ -106,6 +128,14 @@ public class TopicManager {
 		return curr;
 	}
 	
+	public int getTopicTotalMessages(String path){
+		return this.getNode(path).getTotalMessages();
+	}
+	
+	public long getTopicTimestamp(String path){
+		return this.getNode(path).getTimestamp();
+	}
+	
 	public Object getMessageToSend(String path){
 		return this.getNode(path).getMessages().poll();
 	}
@@ -119,6 +149,7 @@ public class TopicManager {
 		Node node = this.getNode(path);
 		this.lastUpdatedTopics.add(path);
 		node.getMessages().add(message);
+		node.setTotalMessages(node.getTotalMessages()+1);
 	}
 	
 	public ArrayList<String> getSubscribed(String path){
@@ -200,6 +231,16 @@ public class TopicManager {
 		this.lastUpdatedTopics = lastUpdatedTopics;
 	}
 	
+	public String getFullName(Node node){
+		String str = node.getName();
+		node = node.getParent();
+		while(node != null && node != root){
+			str = node.getName() + "/" + str;
+			node = node.getParent();
+		}
+		return str;
+	}
+	
 	public ArrayList<Topic> getTopicList(){
 		ArrayList<Topic> list = new ArrayList<Topic>();
 		ArrayList<Node> nodeList  = new ArrayList<Node>();
@@ -210,7 +251,7 @@ public class TopicManager {
 			for(Entry<String,Node> entry : set){
 				nodeList.add(entry.getValue());
 			}
-			list.add(new MyTopic(nodeList.get(i).getName()));
+			list.add(new MyTopic(getFullName(nodeList.get(i))));
 		}
 		
 		return list;

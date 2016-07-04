@@ -29,7 +29,7 @@ public class MyMapMessage extends MyMessage implements MapMessage{
 	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		super.readExternal(in);
-		this.mapBody =  (HashMap<String,Object>) in.readObject();
+		this.mapBody = (HashMap<String,Object>) in.readObject();
 	}
 	
 	@Override

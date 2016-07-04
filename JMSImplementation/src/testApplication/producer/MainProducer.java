@@ -58,6 +58,14 @@ public class MainProducer {
 			for(int i = 0 ; i < arr.size(); i++){
 				System.out.println("> " + arr.get(i).getTopicName() + " (" + map.get(arr.get(i).getTopicName()) + ")");
 			}
+			
+			HashMap<String, HashMap<String, Double>> stats = admin.getTopicsStats();
+			
+			for(String t: stats.keySet()){
+				System.out.println("Topic: " + t);
+				System.out.println("   - Avg messages per minute: " + stats.get(t).get("average_messages_per_minute"));
+				System.out.println("   - Total messages: " + stats.get(t).get("total_messages"));
+			}
 
 			sendText("The Biggest TickTackToe event of the world will begin!");
 			while(rematch ==1){
