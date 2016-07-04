@@ -83,21 +83,22 @@ public class MainConsumer {
 				consumer.setMessageListener(new MessageListener() {
 					@Override
 					public void onMessage(Message arg0) {
-						if(arg0 instanceof BytesMessage){
-							try {
+						try {
+							Topic topic = (Topic)arg0.getJMSDestination();
+							System.out.println("On topic "+topic.getTopicName());
+							if(arg0 instanceof BytesMessage){							
 								BytesMessage msg = (BytesMessage)arg0;
 								System.out.println(msg.readUTF());
-							} catch (JMSException e) {
-								e.printStackTrace();
+							}else if(arg0 instanceof ObjectMessage){
+								TickTackToe game;
+								Object o = ((ObjectMessage) arg0).getObject();
+								if(o instanceof TickTackToe){
+									game = (TickTackToe)o;
+									game.printGame();
+								}
 							}
-						}else if(arg0 instanceof ObjectMessage){
-							TickTackToe game;
-							try {
-								game = (TickTackToe) ((ObjectMessage) arg0).getObject();
-								game.printGame();
-							} catch (JMSException e) {
-								e.printStackTrace();
-							}						
+						} catch (JMSException e) {
+							e.printStackTrace();
 						}
 					}
 				});

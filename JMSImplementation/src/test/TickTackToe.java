@@ -86,7 +86,7 @@ public class TickTackToe implements Serializable, Externalizable, Cloneable {
 		do{
 			x = in.nextInt();
 			y = in.nextInt();
-			invalid = x <0 && x > 3 && y<0 && y>3;
+			invalid = x <= 0 && x > 3 && y<=0 && y>3;
 			if(invalid){
 				System.out.println("Invalid position, please try again.");
 			}
