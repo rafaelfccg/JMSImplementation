@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -147,7 +148,13 @@ public class ClientRequestHandler {
 			if(!socket.isClosed()){
 				try {
 					send(message);
-				} catch (IOException e) {
+				} catch (SocketException e) {
+					try {
+						closeConnection();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}catch (IOException e) {
 					e.printStackTrace();
 				}
 			}

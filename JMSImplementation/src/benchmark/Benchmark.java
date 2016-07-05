@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 public class Benchmark {
 
-	public static final int PRODUCERS = 1;
+	public static final int PRODUCERS = 2;
 	
-	public static final int CONSUMERS = 5;
+	public static final int CONSUMERS = 20;
 	
-	public static final int MESSAGES = 30;
+	public static final int MESSAGES = 100;
 	
 	public static void main(String[] args) throws InterruptedException{
 		

@@ -179,6 +179,7 @@ public class MyBytesMessage extends MyMessage implements BytesMessage{
 			getInputStream();
 			d = in.readDouble();
 		} catch (IOException e) {
+			e.printStackTrace();
 			raise(e);
 		}
 		return d;
