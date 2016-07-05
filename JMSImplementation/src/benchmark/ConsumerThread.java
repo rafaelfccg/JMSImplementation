@@ -36,7 +36,7 @@ public class ConsumerThread implements Runnable{
 			for(int i=0; i < Benchmark.MESSAGES - 1; i++){
 				MyObjectMessage m = (MyObjectMessage) consumer.receive();
 				try{
-				System.out.println(m.getObject().toString());
+//				System.out.println(m.getObject().toString());
 				}catch(Exception e){
 					e.printStackTrace();
 				}
