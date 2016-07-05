@@ -109,14 +109,22 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 	@Override
 	public void close() throws JMSException {
 		setModified();
+		lock.lock();
 		this.open = false;
 		try {
+			while(!this.waitingAck.isEmpty()){
+				this.messageSent.await();
+			}
 			if(this.receiverConnection != null) this.receiverConnection.closeConnection();
 			if(this.senderConnection != null) this.senderConnection.closeConnection();
 		} catch (IOException e) {
 			callExceptionListener(e);
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			callExceptionListener(e);
+			e.printStackTrace();
 		}
+		lock.unlock();
 	}
 
 	@Override
@@ -218,9 +226,9 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		isOpen();
 		setModified();
 		this.waitingAck.add(new MessageWaitingAck(myMessage));
-			this.lock.lock();
+		this.lock.lock();
 		if(lock.hasWaiters(this.messageSent)){
-			this.messageSent.signal();
+			this.messageSent.signalAll();
 		}
 		this.lock.unlock();
 		
@@ -308,26 +316,36 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 	@Override
 	public void run() {
 		while(true){
+			
 			if(this.waitingAck.isEmpty()){
 				lock.lock();
+				if(!this.open) return;
 				try {
 					this.messageSent.await();
 				} catch (InterruptedException e) {}
 				lock.unlock();
 			}
+			if(!this.open) return;
 			MessageWaitingAck  msg = this.waitingAck.peek();
 			long curr =System.currentTimeMillis();
 			if(msg.getTimestamp() <= curr){
 				try {
 					this.waitingAck.remove(msg);
 					this.sendMessage(msg.getMessage());
-				} catch (IOException | JMSException e) {e.printStackTrace();}
+				} catch (IOException | JMSException e) {
+					callExceptionListener(e);
+					e.printStackTrace();
+				}
 			}else{
 				try {
 					Thread.sleep(msg.getTimestamp()-curr);
-				} catch (InterruptedException e) {e.printStackTrace();}
+				} catch (InterruptedException e) {
+					callExceptionListener(e);
+					e.printStackTrace();
+				}
 			}
-		}
+			if(this.lock.isHeldByCurrentThread()) this.lock.unlock();
+		}	
 	}
 	
 	private class MessageWaitingAck {

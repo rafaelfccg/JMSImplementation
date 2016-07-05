@@ -65,7 +65,9 @@ public class ClientRequestHandler {
 	}
 	 
 	public void send(Object object) throws IOException{
-		this.output.writeObject(object);
+		this.lock.lock();
+		if(!this.socket.isClosed())this.output.writeObject(object);
+		this.lock.unlock();
 	}
 	public void sendMessageAsync(Query query){
 		MyMessageSender sender = new MyMessageSender();
@@ -87,8 +89,9 @@ public class ClientRequestHandler {
 	}
 	
 	public void closeConnection() throws IOException{
-		try{
+		try{			
 			this.socket.shutdownInput();
+			this.socket.shutdownOutput();
 			this.socket.close();
 		}catch(Exception e){
 			
@@ -126,15 +129,15 @@ public class ClientRequestHandler {
 		Query message;
 		@Override
 		public void run() {
+			lock.lock();
 			if(!socket.isClosed()){
 				try {
-					lock.lock();
 					send(message);
-					lock.unlock();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
+			lock.unlock();
 		}
 	}
 }
