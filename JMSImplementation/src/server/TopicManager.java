@@ -21,7 +21,7 @@ public class TopicManager {
 		
 		private String name;
 		
-		private ArrayList<String> subscribed;
+		private ConcurrentLinkedQueue<String> subscribed;
 		
 		private HashMap<String, Node> children;
 		
@@ -36,18 +36,18 @@ public class TopicManager {
 		public Node(String name, Node parent){
 			this.name = name;
 			this.parent = parent;
-			this.subscribed = new ArrayList<String>();
+			this.subscribed = new ConcurrentLinkedQueue<String>();
 			this.children = new HashMap<String, Node>();
 			this.messages = new PriorityBlockingQueue<MessageQuery>();
 			this.totalMessages = 0;
 			this.timestamp = System.currentTimeMillis();
 		}
 
-		public ArrayList<String> getSubscribed() {
+		public ConcurrentLinkedQueue<String> getSubscribed() {
 			return subscribed;
 		}
 
-		public void setSubscribed(ArrayList<String> subscribed) {
+		public void setSubscribed(ConcurrentLinkedQueue<String> subscribed) {
 			this.subscribed = subscribed;
 		}
 
@@ -216,7 +216,7 @@ public class TopicManager {
 	private String dumpAux(Node node, int level){
 		String str = "";
 		for(int i=0; i < level*4; i++) str += " ";
-		str += node.getName() + ": " + String.join(", ", node.getSubscribed()) + "\n";
+		str += node.getName() + "(" + node.getSubscribed().size() + "): " + String.join(", ", node.getSubscribed()) + "\n";
 		for(Node child: node.getChildren().values()){
 			str += dumpAux(child, level + 1);
 		}

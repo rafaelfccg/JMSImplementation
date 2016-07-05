@@ -92,6 +92,7 @@ public class MyMessageConsumer implements MessageConsumer, MessageListener {
 					return msg;
 				}
 			}
+			msg = lastMessage;
 		} catch (InterruptedException e) {
 			Utils.raise(e);
 		}finally{

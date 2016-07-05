@@ -163,7 +163,7 @@ public class MySession implements Session, SessionMessageReceiverListener, Sessi
 
 	@Override
 	public ObjectMessage createObjectMessage(Serializable arg0) throws JMSException {
-		throw new JMSException("Not Implemented method");
+		return new MyObjectMessage(arg0);
 	}
 
 	@Override

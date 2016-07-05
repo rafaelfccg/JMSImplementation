@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import javax.jms.JMSException;
 
 import messages.MyMessage;
+import messages.MyObjectMessage;
 import server.misc.MessageAckPair;
 import server.query.AckQuery;
 import server.query.MessageQuery;
@@ -153,7 +154,19 @@ public class ConnectionHandler implements Runnable{
 			dumbMsg.setJMSMessageID(query.getMessageID());
 			MessageAckPair dumb = new MessageAckPair(new MessageQuery(null, dumbMsg), 0L);
 			
-			this.server.getReceivers().get(this.clientId).getWaitingAck().remove(dumb);
+			System.out.println("Received ack [id: " + query.getMessageID() + "] [size: " + this.server.getReceivers().get(this.clientId).getWaitingAck().size() + "]");
+			
+			ConcurrentLinkedQueue<MessageAckPair> newQueue = new ConcurrentLinkedQueue<MessageAckPair>();
+			ConcurrentLinkedQueue<MessageAckPair> oldQueue = new ConcurrentLinkedQueue<MessageAckPair>();
+			
+			for(MessageAckPair p : oldQueue){
+				if(query.getMessageID().equals(p.getMsgId())) continue;
+				newQueue.add(p);
+			}
+			
+			this.server.getReceivers().get(this.clientId).setWaitingAck(newQueue);
+			
+			System.out.println("Removed ack [id: " + query.getMessageID() + "] [size: " + this.server.getReceivers().get(this.clientId).getWaitingAck().size() + "]");
 		}finally{
 			this.ackLock.unlock();
 		}
@@ -171,21 +184,26 @@ public class ConnectionHandler implements Runnable{
 		
 		try{
 			
+			ackLock.lock();
+			
 			Query query = (Query) this.toSend.take();
 		
 			this.outputStream.writeObject(query);
-			
-			ackLock.lock();
-		
+
 			if(query instanceof MessageQuery){
-				logger.log(Level.INFO, "Sending message {0} from client {1}", 
+				logger.log(Level.INFO, "Sending message {0} to client {1}", 
 						new Object[]{ ((MessageQuery) query).getMessage().getJMSMessageID(), query.getClientId()});
 				MessageQuery msgQuery = (MessageQuery) query;
-				if(msgQuery.getMessage().getJMSRedelivered()) return;
+				
+				//if(msgQuery.getMessage().getJMSRedelivered()) return;
 				MessageAckPair pair = new MessageAckPair((MessageQuery) query, System.currentTimeMillis() + 10*1000);
 				pair.setMsgId(((MessageQuery) query).getMessage().getJMSMessageID());
+				
 				this.server.getReceivers().get(this.clientId).getWaitingAck().add(pair);
+				System.out.println("Sending message [id: " + pair.getMsgId() + "] [size: " + this.server.getReceivers().get(this.clientId).getWaitingAck().size() + "]");
 			}
+		}catch(Exception e){
+			e.printStackTrace();
 		}finally{
 			if(ackLock.isHeldByCurrentThread())ackLock.unlock();
 		}
@@ -231,8 +249,7 @@ public class ConnectionHandler implements Runnable{
 		// Register this socket in the server
 		this.server.handleRegisterReceiver(query, this.id);
 		
-		Thread t = new Thread(new MessageManager(this.server, 
-				this.server.getReceivers().get(this.clientId).getWaitingAck(), this.ackLock));
+		Thread t = new Thread(new MessageManager(this.server, this.clientId, this.ackLock));
 		t.start();
 	}
 

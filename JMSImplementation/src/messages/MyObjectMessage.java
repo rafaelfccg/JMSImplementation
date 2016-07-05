@@ -14,6 +14,11 @@ public class MyObjectMessage extends MyMessage implements ObjectMessage{
 	public MyObjectMessage(){}
 
 	
+	public MyObjectMessage(Serializable arg0) {
+		this.object = arg0;
+	}
+
+
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		super.writeExternal(out);
