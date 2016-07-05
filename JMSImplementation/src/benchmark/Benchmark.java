@@ -35,7 +35,9 @@ public class Benchmark {
 		}
 		
 		for(Thread t: consumers) t.join();
+		System.out.println("Consumers ending");
 		for(Thread t: producers) t.join();
+		System.out.println("Producers ending");
 		
 	}
 	

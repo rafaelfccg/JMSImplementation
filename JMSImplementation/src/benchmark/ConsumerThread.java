@@ -36,13 +36,16 @@ public class ConsumerThread implements Runnable{
 			for(int i=0; i < Benchmark.MESSAGES - 1; i++){
 				MyObjectMessage m = (MyObjectMessage) consumer.receive();
 				try{
-//				System.out.println(m.getObject().toString());
+					//System.out.println(m.getObject().toString());
 				}catch(Exception e){
 					e.printStackTrace();
 				}
 				long now = System.currentTimeMillis();
 				sum += now - lastReceived;
 			}
+			
+			//session.close();
+			//connection.close();
 			
 			System.out.println("[" + connection.getClientID() + "] Average time: " + (sum/Benchmark.MESSAGES));
 			

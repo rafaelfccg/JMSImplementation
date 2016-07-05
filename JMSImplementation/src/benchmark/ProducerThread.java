@@ -33,6 +33,9 @@ public class ProducerThread implements Runnable {
 			
 			//System.out.println("[Producer] Average time: " + (sum/Benchmark.MESSAGES));
 			
+			//session.close();
+			//connection.close();
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}
