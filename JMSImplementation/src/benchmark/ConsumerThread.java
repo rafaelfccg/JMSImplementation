@@ -44,10 +44,11 @@ public class ConsumerThread implements Runnable{
 				sum += now - lastReceived;
 			}
 			
-			session.close();
-			connection.close();
-			
 			System.out.println("[" + connection.getClientID() + "] Average time: " + (sum/Benchmark.MESSAGES));
+			session.close();
+			System.out.println("Consumer close session");
+			connection.close();
+			System.out.println("Consumer close connection");
 			
 		}catch(Exception e){
 			e.printStackTrace();

@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jms.Message;
@@ -25,18 +27,23 @@ public class ClientRequestHandler {
 	
 	private MyConnection connection;
 	ReentrantLock lock;
-	Thread receiverThread; 
+	Condition finishRequest;
+	Thread receiverThread;
+	AtomicInteger pedent;
 	
 	
 	public ClientRequestHandler(String hostname, int port,boolean isSubscriber, String clientId) throws UnknownHostException, ClassNotFoundException , IOException{
 		this.hostname = hostname;
 		this.port = port;
 		lock = new ReentrantLock();
+		this.finishRequest = this.lock.newCondition();
+		pedent = new AtomicInteger(0);
 		this.socket = new Socket(this.hostname, this.port);
 		this.output = new ObjectOutputStream(this.socket.getOutputStream());
 		this.input = new ObjectInputStream(this.socket.getInputStream());
 		sendType(isSubscriber,clientId);
 		waitAck(isSubscriber);	
+		
 	}
 	
 	private void sendType(boolean isSubscriber, String clientId) throws IOException {
@@ -66,7 +73,10 @@ public class ClientRequestHandler {
 	 
 	public void send(Object object) throws IOException{
 		this.lock.lock();
+		this.pedent.incrementAndGet();
 		if(!this.socket.isClosed())this.output.writeObject(object);
+		this.pedent.decrementAndGet();
+		this.finishRequest.signal();
 		this.lock.unlock();
 	}
 	public void sendMessageAsync(Query query){
@@ -76,9 +86,7 @@ public class ClientRequestHandler {
 		senderThread.start();
 	}
 	public Object receive() throws IOException, ClassNotFoundException{
-		lock.lock();
 		Object object  = this.input.readObject();
-		lock.unlock();
 		return object;
 	}
 	
@@ -89,10 +97,16 @@ public class ClientRequestHandler {
 	}
 	
 	public void closeConnection() throws IOException{
-		try{			
+		try{
 			this.socket.shutdownInput();
 			this.socket.shutdownOutput();
+			this.lock.lock();
+			while(this.pedent.get() > 0){
+				this.finishRequest.await();
+			}
+			
 			this.socket.close();
+			this.lock.unlock();
 		}catch(Exception e){
 			
 		}

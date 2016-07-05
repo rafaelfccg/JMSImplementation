@@ -51,6 +51,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 	private ArrayList<Session> sessions;
 	ReentrantLock lock = new ReentrantLock();
 	private Condition messageSent;
+	private Condition ackReceived;
 	
 	private static int  id = 0;
 	
@@ -62,6 +63,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		this.sessions = new ArrayList<Session>();
 		this.clientId = "CLT:"+UUID.randomUUID().toString()+id;
 		this.messageSent = lock.newCondition();
+		this.ackReceived = lock.newCondition();
 		id++;
 		this.waitingAck = new ConcurrentLinkedQueue<MessageWaitingAck>();
 	}
@@ -88,8 +90,11 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 					}
 				}else if(query instanceof AckQuery){
 					AckQuery ackQuery = (AckQuery) query;
-					MessageWaitingAck remove = new MessageWaitingAck(ackQuery.getMessageID());					
+					MessageWaitingAck remove = new MessageWaitingAck(ackQuery.getMessageID());
+					this.lock.lock();
 					this.waitingAck.remove(remove);
+					this.ackReceived.signalAll();
+					this.lock.unlock();
 				}
 			} catch (JMSException e) {
 				e.printStackTrace();
@@ -113,7 +118,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 		this.open = false;
 		try {
 			while(!this.waitingAck.isEmpty()){
-				this.messageSent.await();
+				this.ackReceived.await();
 			}
 			if(this.receiverConnection != null) this.receiverConnection.closeConnection();
 			if(this.senderConnection != null) this.senderConnection.closeConnection();
@@ -124,6 +129,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 			callExceptionListener(e);
 			e.printStackTrace();
 		}
+		this.messageSent.signalAll();
 		lock.unlock();
 	}
 
@@ -316,7 +322,7 @@ public class MyConnection implements Connection, MyConnectionSendMessage, Runnab
 	@Override
 	public void run() {
 		while(true){
-			
+			if(!this.open) return;
 			if(this.waitingAck.isEmpty()){
 				lock.lock();
 				if(!this.open) return;

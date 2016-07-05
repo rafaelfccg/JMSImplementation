@@ -31,8 +31,6 @@ public class ProducerThread implements Runnable {
 				producer.send(msg);
 			}
 			
-			//System.out.println("[Producer] Average time: " + (sum/Benchmark.MESSAGES));
-			
 			session.close();
 			connection.close();
 			
